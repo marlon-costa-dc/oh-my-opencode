@@ -6,7 +6,9 @@ import {
   readBoulderState,
   appendSessionId,
   getPlanProgress,
+  archiveCompletedPlan,
 } from "../../features/boulder-state"
+import type { SisyphusAgentConfig } from "../../config/schema"
 import { getMainSessionID, subagentSessions } from "../../features/claude-code-session-state"
 import { findNearestMessageWithFields, MESSAGE_STORAGE } from "../../features/hook-message-injector"
 import { log } from "../../shared/logger"
@@ -391,6 +393,7 @@ const CONTINUATION_COOLDOWN_MS = 5000
 export interface AtlasHookOptions {
   directory: string
   backgroundManager?: BackgroundManager
+  sisyphusConfig?: SisyphusAgentConfig
 }
 
 function isAbortError(error: unknown): boolean {
@@ -419,6 +422,7 @@ export function createAtlasHook(
   options?: AtlasHookOptions
 ) {
   const backgroundManager = options?.backgroundManager
+  const sisyphusConfig = options?.sisyphusConfig ?? {}
   const sessions = new Map<string, SessionState>()
   const pendingFilePaths = new Map<string, string>()
 
@@ -556,6 +560,11 @@ export function createAtlasHook(
 
         const progress = getPlanProgress(boulderState.active_plan)
         if (progress.isComplete) {
+          // Archive completed plan
+          const archived = archiveCompletedPlan(ctx.directory, boulderState, sisyphusConfig)
+          if (archived) {
+            log(`[${HOOK_NAME}] Plan archived: ${boulderState.plan_name}`)
+          }
           log(`[${HOOK_NAME}] Boulder complete`, { sessionID, plan: boulderState.plan_name })
           return
         }
