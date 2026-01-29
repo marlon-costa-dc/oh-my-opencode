@@ -561,10 +561,8 @@ export function createAtlasHook(
         const progress = getPlanProgress(boulderState.active_plan)
         if (progress.isComplete) {
           // Archive completed plan
-          const archived = archiveCompletedPlan(ctx.directory, boulderState, sisyphusConfig)
-          if (archived) {
-            log(`[${HOOK_NAME}] Plan archived: ${boulderState.plan_name}`)
-          }
+          const archiveResult = archiveCompletedPlan(ctx.directory, boulderState, sisyphusConfig)
+          log(`[${HOOK_NAME}] Plan archive ${archiveResult ? 'ensured' : 'skipped'}: ${boulderState.plan_name}`)
           log(`[${HOOK_NAME}] Boulder complete`, { sessionID, plan: boulderState.plan_name })
           return
         }
