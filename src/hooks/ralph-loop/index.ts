@@ -14,6 +14,7 @@ import type { RalphLoopState, RalphLoopOptions } from "./types"
 import type { ContextStrategy } from "../../config"
 import { getTranscriptPath as getDefaultTranscriptPath } from "../claude-code-hooks/transcript"
 import { findNearestMessageWithFields, MESSAGE_STORAGE } from "../../features/hook-message-injector"
+import { RALPH_LOOP_TEMPLATE } from "../../features/builtin-commands/templates/ralph-loop"
 
 function getMessageDir(sessionID: string): string | null {
   if (!existsSync(MESSAGE_STORAGE)) return null
@@ -45,7 +46,7 @@ interface OpenCodeSessionMessage {
   }>
 }
 
-const CONTINUATION_PROMPT_BASE = `Your previous attempt did not output the completion promise. Continue working on the task.
+const CONTINUE_STRATEGY_PROMPT = `Your previous attempt did not output the completion promise. Continue working on the task.
 
 IMPORTANT:
 - Review your progress so far
@@ -56,17 +57,29 @@ IMPORTANT:
 Original task:
 {{PROMPT}}`
 
-/**
- * Generates the continuation prompt with appropriate prefix based on context strategy.
- * - "reset": Uses plain prefix to allow keyword detection (new session needs mode injections)
- * - "continue": Uses system directive prefix to skip keyword detection (mode already applied in iteration 1)
- */
-function getContinuationPrompt(iteration: number, max: number, strategy: "reset" | "continue"): string {
-  const prefix =
-    strategy === "continue"
-      ? `${SYSTEM_DIRECTIVE_PREFIX} - RALPH LOOP ${iteration}/${max}]`
-      : `[RALPH LOOP - Iteration ${iteration}/${max}]`
-  return `${prefix}\n\n${CONTINUATION_PROMPT_BASE}`
+function getResetStrategyPrompt(prompt: string): string {
+  return `<command-instruction>
+${RALPH_LOOP_TEMPLATE}
+</command-instruction>
+
+<user-task>
+${prompt}
+</user-task>`
+}
+
+function getIterationPrompt(
+  iteration: number,
+  max: number,
+  strategy: "reset" | "continue",
+  prompt: string
+): string {
+  if (strategy === "continue") {
+    const prefix = `${SYSTEM_DIRECTIVE_PREFIX} - RALPH LOOP ${iteration}/${max}]`
+    return `${prefix}\n\n${CONTINUE_STRATEGY_PROMPT}`
+      .replace("{{PROMPT}}", prompt)
+  }
+  const prefix = `[RALPH LOOP - Iteration ${iteration}/${max}]`
+  return `${prefix}\n\n${getResetStrategyPrompt(prompt)}`
 }
 
 export interface RalphLoopHook {
@@ -404,17 +417,20 @@ export function createRalphLoopHook(
         }
       }
 
-      const continuationPrompt = getContinuationPrompt(
+      let iterationPrompt = getIterationPrompt(
         newState.iteration,
         newState.max_iterations,
-        strategy
+        strategy,
+        newState.prompt
       )
-        .replace("{{PROMISE}}", newState.completion_promise)
-        .replace("{{PROMPT}}", newState.prompt)
+
+      if (strategy === "continue") {
+        iterationPrompt = iterationPrompt.replace("{{PROMISE}}", newState.completion_promise)
+      }
 
       const finalPrompt = newState.ultrawork
-        ? `ultrawork ${continuationPrompt}`
-        : continuationPrompt
+        ? `ultrawork ${iterationPrompt}`
+        : iterationPrompt
 
       await ctx.client.tui
         .showToast({
