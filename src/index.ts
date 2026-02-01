@@ -703,7 +703,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
               ? parseInt(maxIterMatch[1], 10)
               : undefined,
             completionPromise: promiseMatch?.[1],
-            strategy: strategyMatch?.[1] as "reset" | "continue" | undefined,
+            strategy: strategyMatch?.[1]?.toLowerCase() as "reset" | "continue" | undefined,
           });
         } else if (isCancelRalphTemplate) {
           log("[ralph-loop] Cancelling loop from chat.message", {
@@ -881,7 +881,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
               ? parseInt(maxIterMatch[1], 10)
               : undefined,
             completionPromise: promiseMatch?.[1],
-            strategy: strategyMatch?.[1] as "reset" | "continue" | undefined,
+            strategy: strategyMatch?.[1]?.toLowerCase() as "reset" | "continue" | undefined,
           });
         } else if (command === "cancel-ralph" && sessionID) {
           ralphLoop.cancelLoop(sessionID);
@@ -906,7 +906,10 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
               ? parseInt(maxIterMatch[1], 10)
               : undefined,
             completionPromise: promiseMatch?.[1],
-            strategy: strategyMatch?.[1] as "reset" | "continue" | undefined,
+            strategy: strategyMatch?.[1]?.toLowerCase() as
+              | "reset"
+              | "continue"
+              | undefined,
           });
         }
       }
