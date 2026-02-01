@@ -365,6 +365,8 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
     ? safeCreateHook("todo-continuation-enforcer", () => createTodoContinuationEnforcer(ctx, {
         backgroundManager,
         isContinuationStopped: stopContinuationGuard?.isStopped,
+        directory: ctx.directory,
+        ralphLoopStateDir: pluginConfig.ralph_loop?.state_dir,
       }), { enabled: safeHookEnabled })
     : null;
 
@@ -690,6 +692,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
           const promiseMatch = rawTask.match(
             /--completion-promise=["']?([^"'\s]+)["']?/i,
           );
+          const strategyMatch = rawTask.match(/--strategy=(reset|continue)/i);
 
           log("[ralph-loop] Starting loop from chat.message", {
             sessionID: input.sessionID,
@@ -700,6 +703,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
               ? parseInt(maxIterMatch[1], 10)
               : undefined,
             completionPromise: promiseMatch?.[1],
+            strategy: strategyMatch?.[1] as "reset" | "continue" | undefined,
           });
         } else if (isCancelRalphTemplate) {
           log("[ralph-loop] Cancelling loop from chat.message", {
@@ -859,7 +863,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
         if (command === "ralph-loop" && sessionID) {
           const rawArgs =
-            args?.command?.replace(/^\/?(ralph-loop)\s*/i, "") || "";
+            args?.command?.replace(/^\/?(?:ralph-loop)\s*/i, "") || "";
           const taskMatch = rawArgs.match(/^["'](.+?)["']/);
           const prompt =
             taskMatch?.[1] ||
@@ -870,18 +874,20 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
           const promiseMatch = rawArgs.match(
             /--completion-promise=["']?([^"'\s]+)["']?/i,
           );
+          const strategyMatch = rawArgs.match(/--strategy=(reset|continue)/i);
 
           ralphLoop.startLoop(sessionID, prompt, {
             maxIterations: maxIterMatch
               ? parseInt(maxIterMatch[1], 10)
               : undefined,
             completionPromise: promiseMatch?.[1],
+            strategy: strategyMatch?.[1] as "reset" | "continue" | undefined,
           });
         } else if (command === "cancel-ralph" && sessionID) {
           ralphLoop.cancelLoop(sessionID);
         } else if (command === "ulw-loop" && sessionID) {
           const rawArgs =
-            args?.command?.replace(/^\/?(ulw-loop)\s*/i, "") || "";
+            args?.command?.replace(/^\/?(?:ulw-loop)\s*/i, "") || "";
           const taskMatch = rawArgs.match(/^["'](.+?)["']/);
           const prompt =
             taskMatch?.[1] ||
@@ -892,6 +898,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
           const promiseMatch = rawArgs.match(
             /--completion-promise=["']?([^"'\s]+)["']?/i,
           );
+          const strategyMatch = rawArgs.match(/--strategy=(reset|continue)/i);
 
           ralphLoop.startLoop(sessionID, prompt, {
             ultrawork: true,
@@ -899,6 +906,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
               ? parseInt(maxIterMatch[1], 10)
               : undefined,
             completionPromise: promiseMatch?.[1],
+            strategy: strategyMatch?.[1] as "reset" | "continue" | undefined,
           });
         }
       }
