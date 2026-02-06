@@ -41,7 +41,8 @@
         "enum": [
           "playwright",
           "frontend-ui-ux",
-          "git-master"
+          "git-master",
+          "eskil-core"
         ]
       }
     },
@@ -2009,6 +2010,12 @@
             },
             "additionalProperties": {
               "type": "boolean"
+            }
+          },
+          "auto_skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           },
           "prompt_append": {

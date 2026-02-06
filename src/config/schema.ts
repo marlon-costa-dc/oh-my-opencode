@@ -34,6 +34,7 @@ export const BuiltinSkillNameSchema = z.enum([
   "playwright",
   "frontend-ui-ux",
   "git-master",
+  "eskil-core",
 ])
 
 export const OverridableAgentNameSchema = z.enum([
@@ -164,6 +165,7 @@ export const CategoryConfigSchema = z.object({
   reasoningEffort: z.enum(["low", "medium", "high"]).optional(),
   textVerbosity: z.enum(["low", "medium", "high"]).optional(),
   tools: z.record(z.string(), z.boolean()).optional(),
+  auto_skills: z.array(z.string()).optional(),
   prompt_append: z.string().optional(),
 })
 

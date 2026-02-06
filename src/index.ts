@@ -232,12 +232,13 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
 
   const callOmoAgent = createCallOmoAgent(ctx, backgroundManager);
   const lookAt = createLookAt(ctx);
+  const disabledSkills = new Set(pluginConfig.disabled_skills ?? []);
   const sisyphusTask = createSisyphusTask({
     manager: backgroundManager,
     client: ctx.client,
     userCategories: pluginConfig.categories,
+    disabledSkills,
   });
-  const disabledSkills = new Set(pluginConfig.disabled_skills ?? []);
   const systemMcpNames = getSystemMcpServerNames();
   const builtinSkills = createBuiltinSkills().filter((skill) => {
     if (disabledSkills.has(skill.name as never)) return false;

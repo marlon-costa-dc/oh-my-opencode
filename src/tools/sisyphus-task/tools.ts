@@ -89,6 +89,7 @@ export interface SisyphusTaskToolOptions {
   manager: BackgroundManager
   client: OpencodeClient
   userCategories?: CategoriesConfig
+  disabledSkills?: Set<string>
 }
 
 export interface BuildSystemContentInput {
@@ -111,7 +112,7 @@ export function buildSystemContent(input: BuildSystemContentInput): string | und
 }
 
 export function createSisyphusTask(options: SisyphusTaskToolOptions): ToolDefinition {
-  const { manager, client, userCategories } = options
+  const { manager, client, userCategories, disabledSkills } = options
 
   return tool({
     description: SISYPHUS_TASK_DESCRIPTION,
@@ -134,12 +135,41 @@ export function createSisyphusTask(options: SisyphusTaskToolOptions): ToolDefini
       }
       const runInBackground = args.run_in_background === true
 
+      // Merge explicit skills with category auto_skills
+      const explicitSkills = args.skills
+      const explicitSkillSet = new Set(explicitSkills)
+
+      const autoSkills = args.category
+        ? (() => {
+            const resolvedCategory = resolveCategoryConfig(args.category, userCategories)
+            const categoryAutoSkills = resolvedCategory?.config.auto_skills ?? []
+            return categoryAutoSkills.filter((skillName) => {
+              if (disabledSkills?.has(skillName)) return false
+              if (skillName === "eskil-core" && explicitSkillSet.has("eskil")) return false
+              return true
+            })
+          })()
+        : []
+
+      const effectiveSkills: string[] = []
+      const seenSkills = new Set<string>()
+      for (const skillName of [...explicitSkills, ...autoSkills]) {
+        if (seenSkills.has(skillName)) continue
+        seenSkills.add(skillName)
+        effectiveSkills.push(skillName)
+      }
+      args.skills = effectiveSkills
+
       let skillContent: string | undefined
-      if (args.skills.length > 0) {
-        const { resolved, notFound } = resolveMultipleSkills(args.skills)
+      if (effectiveSkills.length > 0) {
+        const { resolved, notFound } = resolveMultipleSkills(effectiveSkills)
         if (notFound.length > 0) {
-          const available = createBuiltinSkills().map(s => s.name).join(", ")
-          return `❌ Skills not found: ${notFound.join(", ")}. Available: ${available}`
+          // Only error on explicitly requested skills, not auto-injected ones
+          const explicitNotFound = notFound.filter(s => explicitSkillSet.has(s))
+          if (explicitNotFound.length > 0) {
+            const available = createBuiltinSkills().map(s => s.name).join(", ")
+            return `❌ Skills not found: ${explicitNotFound.join(", ")}. Available: ${available}`
+          }
         }
         skillContent = Array.from(resolved.values()).join("\n\n")
       }

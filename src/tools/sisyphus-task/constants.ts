@@ -191,6 +191,7 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
   ultrabrain: {
     model: "openai/gpt-5.2",
     temperature: 0.1,
+    auto_skills: ["eskil-core"],
   },
   artistry: {
     model: "google/gemini-3-pro-preview",
@@ -203,6 +204,7 @@ export const DEFAULT_CATEGORIES: Record<string, CategoryConfig> = {
   "most-capable": {
     model: "anthropic/claude-opus-4-5",
     temperature: 0.1,
+    auto_skills: ["eskil-core"],
   },
   writing: {
     model: "google/gemini-3-flash-preview",
