@@ -3,6 +3,26 @@ import { join } from "node:path"
 import { MESSAGE_STORAGE } from "../../features/hook-message-injector"
 import type { DelegateTaskArgs } from "./types"
 
+interface MessagePart {
+  type?: string
+  text?: string
+}
+
+/**
+ * Extract text content from message parts in a single pass.
+ * Optimized: replaces filter().map().filter().join() chain with single reduce().
+ */
+export function extractTextContent(parts: MessagePart[] | undefined | null): string {
+  if (!parts || parts.length === 0) return ""
+
+  return parts.reduce<string[]>((acc, part) => {
+    if ((part.type === "text" || part.type === "reasoning") && part.text) {
+      acc.push(part.text)
+    }
+    return acc
+  }, []).join("\n")
+}
+
 /**
  * Parse a model string in "provider/model" format.
  */

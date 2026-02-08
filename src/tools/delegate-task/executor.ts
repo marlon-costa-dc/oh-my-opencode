@@ -4,7 +4,7 @@ import type { ModelFallbackInfo } from "../../features/task-toast-manager/types"
 import type { DelegateTaskArgs, ToolContextWithMetadata, OpencodeClient } from "./types"
 import { DEFAULT_CATEGORIES, CATEGORY_DESCRIPTIONS, isPlanFamily } from "./constants"
 import { getTimingConfig } from "./timing"
-import { parseModelString, getMessageDir, formatDuration, formatDetailedError } from "./helpers"
+import { parseModelString, getMessageDir, formatDuration, formatDetailedError, extractTextContent } from "./helpers"
 import { resolveCategoryConfig } from "./categories"
 import { buildSystemContent } from "./prompt-builder"
 import { findNearestMessageWithFields, findFirstMessageWithAgent } from "../../features/hook-message-injector"
@@ -279,8 +279,7 @@ export async function executeSyncContinuation(
     return `No assistant response found.\n\nSession ID: ${args.session_id}`
   }
 
-  const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
-  const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
+  const textContent = extractTextContent(lastMessage?.parts)
   const duration = formatDuration(startTime)
 
   return `Task continued and completed in ${duration}.
@@ -408,8 +407,7 @@ export async function executeUnstableAgentTask(
       return `No assistant response found (task ran in background mode).\n\nSession ID: ${sessionID}`
     }
 
-    const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
-    const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
+    const textContent = extractTextContent(lastMessage?.parts)
     const duration = formatDuration(startTime)
 
     return `SUPERVISED TASK COMPLETED SUCCESSFULLY
@@ -672,8 +670,7 @@ export async function executeSyncTask(
       return `No assistant response found.\n\nSession ID: ${sessionID}`
     }
 
-    const textParts = lastMessage?.parts?.filter((p) => p.type === "text" || p.type === "reasoning") ?? []
-    const textContent = textParts.map((p) => p.text ?? "").filter(Boolean).join("\n")
+    const textContent = extractTextContent(lastMessage?.parts)
 
     const duration = formatDuration(startTime)
 
