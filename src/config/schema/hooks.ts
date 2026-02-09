@@ -27,6 +27,7 @@ export const HookNameSchema = z.enum([
 
   "thinking-block-validator",
   "ralph-loop",
+  "review-loop",
   "category-skill-reminder",
 
   "compaction-context-injector",

@@ -12,6 +12,7 @@ import {
   createNonInteractiveEnvHook,
   createInteractiveBashSessionHook,
   createRalphLoopHook,
+  createReviewLoopHook,
   createEditErrorRecoveryHook,
   createDelegateTaskRetryHook,
   createTaskResumeInfoHook,
@@ -43,6 +44,7 @@ export type SessionHooks = {
   nonInteractiveEnv: ReturnType<typeof createNonInteractiveEnvHook> | null
   interactiveBashSession: ReturnType<typeof createInteractiveBashSessionHook> | null
   ralphLoop: ReturnType<typeof createRalphLoopHook> | null
+  reviewLoop: ReturnType<typeof createReviewLoopHook> | null
   editErrorRecovery: ReturnType<typeof createEditErrorRecoveryHook> | null
   delegateTaskRetry: ReturnType<typeof createDelegateTaskRetryHook> | null
   startWork: ReturnType<typeof createStartWorkHook> | null
@@ -128,6 +130,14 @@ export function createSessionHooks(args: {
         }))
     : null
 
+  const reviewLoop = isHookEnabled("review-loop")
+    ? safeHook("review-loop", () =>
+        createReviewLoopHook(ctx, {
+          config: pluginConfig.review_loop,
+          checkSessionExists: async (sessionId) => sessionExists(sessionId),
+        }))
+    : null
+
   const editErrorRecovery = isHookEnabled("edit-error-recovery")
     ? safeHook("edit-error-recovery", () => createEditErrorRecoveryHook(ctx))
     : null
@@ -168,6 +178,7 @@ export function createSessionHooks(args: {
     nonInteractiveEnv,
     interactiveBashSession,
     ralphLoop,
+    reviewLoop,
     editErrorRecovery,
     delegateTaskRetry,
     startWork,
