@@ -1,4 +1,4 @@
-import type { AgentOverrides } from "../../config"
+import type { AgentOverrides, SisyphusAgentConfig } from "../../config"
 import type { BackgroundManager } from "../../features/background-agent"
 
 export type ModelInfo = { providerID: string; modelID: string }
@@ -8,6 +8,7 @@ export interface AtlasHookOptions {
   backgroundManager?: BackgroundManager
   isContinuationStopped?: (sessionID: string) => boolean
   agentOverrides?: AgentOverrides
+  sisyphusAgentConfig?: SisyphusAgentConfig
 }
 
 export interface ToolExecuteAfterInput {

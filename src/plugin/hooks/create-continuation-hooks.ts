@@ -110,6 +110,7 @@ export function createContinuationHooks(args: {
           isContinuationStopped: (sessionID: string) =>
             stopContinuationGuard?.isStopped(sessionID) ?? false,
           agentOverrides: pluginConfig.agents,
+          sisyphusAgentConfig: pluginConfig.sisyphus_agent,
         }))
     : null
 

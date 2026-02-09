@@ -1,5 +1,5 @@
 import type { PluginInput } from "@opencode-ai/plugin"
-import { getPlanProgress, readBoulderState } from "../../features/boulder-state"
+import { getPlanProgress, readBoulderState, archiveCompletedPlan } from "../../features/boulder-state"
 import { getMainSessionID, subagentSessions } from "../../features/claude-code-session-state"
 import { log } from "../../shared/logger"
 import { HOOK_NAME } from "./hook-name"
@@ -102,6 +102,10 @@ export function createAtlasEventHandler(input: {
 
       const progress = getPlanProgress(boulderState.active_plan)
       if (progress.isComplete) {
+        // Archive completed plan
+        const sisyphusConfig = options?.sisyphusAgentConfig ?? {}
+        const archiveResult = archiveCompletedPlan(ctx.directory, boulderState, sisyphusConfig)
+        log(`[${HOOK_NAME}] Plan archive ${archiveResult ? 'ensured' : 'skipped'}: ${boulderState.plan_name}`)
         log(`[${HOOK_NAME}] Boulder complete`, { sessionID, plan: boulderState.plan_name })
         return
       }
