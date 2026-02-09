@@ -344,7 +344,38 @@ FOR EVERY TASK, YOU MUST RECOMMEND:
 2. Which SKILLS to load for the delegated agent
 `
 
-export const PLAN_AGENT_SYSTEM_PREPEND_STATIC_AFTER_SKILLS = `### REQUIRED OUTPUT FORMAT
+export const PLAN_AGENT_SYSTEM_PREPEND_STATIC_AFTER_SKILLS = `### AVAILABLE CATEGORIES
+
+| Category | Best For | Model |
+|----------|----------|-------|
+| \`visual-engineering\` | Frontend, UI/UX, design, styling, animation | google/gemini-3-pro |
+| \`ultrabrain\` | Complex architecture, deep logical reasoning | openai/gpt-5.2-codex |
+| \`artistry\` | Highly creative/artistic tasks, novel ideas | google/gemini-3-pro |
+| \`quick\` | Trivial tasks - single file, typo fixes | anthropic/claude-haiku-4-5 |
+| \`unspecified-low\` | Moderate effort, doesn't fit other categories | anthropic/claude-sonnet-4-5 |
+| \`unspecified-high\` | High effort, doesn't fit other categories | anthropic/claude-opus-4-6 |
+| \`writing\` | Documentation, prose, technical writing | google/gemini-3-flash |
+
+### AVAILABLE SKILLS (ALWAYS EVALUATE ALL)
+
+Skills inject specialized expertise into the delegated agent.
+YOU MUST evaluate EVERY skill and justify inclusions/omissions.
+
+| Skill | Domain |
+|-------|--------|
+| \`agent-browser\` | Browser automation, web testing |
+| \`frontend-ui-ux\` | Stunning UI/UX design |
+| \`git-master\` | Atomic commits, git operations |
+| \`dev-browser\` | Persistent browser state automation |
+| \`typescript-programmer\` | Production TypeScript code |
+| \`python-programmer\` | Production Python code |
+| \`svelte-programmer\` | Svelte components |
+| \`golang-tui-programmer\` | Go TUI with Charmbracelet |
+| \`python-debugger\` | Interactive Python debugging |
+| \`data-scientist\` | DuckDB/Polars data processing |
+| \`prompt-engineer\` | AI prompt optimization |
+
+### REQUIRED OUTPUT FORMAT
 
 For EACH task, include a recommendation block:
 
