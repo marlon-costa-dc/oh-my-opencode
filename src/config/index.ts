@@ -12,6 +12,8 @@ export {
   BoulderLoopConfigSchema,
   TmuxConfigSchema,
   TmuxLayoutSchema,
+  RuntimeFallbackConfigSchema,
+  FallbackModelsSchema,
 } from "./schema"
 
 export type {
@@ -31,4 +33,6 @@ export type {
   TmuxLayout,
   SisyphusConfig,
   SisyphusTasksConfig,
+  RuntimeFallbackConfig,
+  FallbackModels,
 } from "./schema"

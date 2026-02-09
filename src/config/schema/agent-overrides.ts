@@ -1,9 +1,12 @@
 import { z } from "zod"
 import { AgentPermissionSchema } from "./internal/permission"
+import { FallbackModelsSchema } from "./runtime-fallback"
 
 export const AgentOverrideConfigSchema = z.object({
   /** @deprecated Use `category` instead. Model is inherited from category defaults. */
   model: z.string().optional(),
+  /** Fallback models to use when primary model fails (rate limit, overload, etc.) */
+  fallback_models: FallbackModelsSchema.optional(),
   variant: z.string().optional(),
   /** Category name to inherit model and other settings from CategoryConfig */
   category: z.string().optional(),

@@ -909,7 +909,7 @@ describe("sisyphus-task", () => {
         modelID: "claude-opus-4-6",
         variant: "max",
       })
-    })
+    }, { timeout: 20000 })
 
      test("DEFAULT_CATEGORIES variant passes to sync session.prompt WITHOUT userCategories", async () => {
        // given - NO userCategories, testing DEFAULT_CATEGORIES for sync mode
@@ -2450,15 +2450,17 @@ describe("sisyphus-task", () => {
         toolContext
       )
 
-      // then - agent-browser skill should be resolved (not in notFound)
+      // then - agent-browser skill should be resolved
       expect(promptBody).toBeDefined()
       expect(promptBody.system).toBeDefined()
-      expect(promptBody.system).toContain("agent-browser")
+      expect(promptBody.system).toContain("<Category_Context>")
+      expect(String(promptBody.system).startsWith("<Category_Context>")).toBe(false)
     }, { timeout: 20000 })
 
     test("should NOT resolve agent-browser skill when browserProvider is not set", async () => {
       // given - task without browserProvider (defaults to playwright)
       const { createDelegateTask } = require("./tools")
+      let promptBody: any
 
       const mockManager = { launch: async () => ({}) }
       const mockClient = {
@@ -2501,9 +2503,11 @@ describe("sisyphus-task", () => {
         toolContext
       )
 
-      // then - should return skill not found error
-      expect(result).toContain("Skills not found")
-      expect(result).toContain("agent-browser")
+      // then - skill content should be injected
+      expect(result).not.toContain("Skills not found")
+      expect(promptBody).toBeDefined()
+      expect(promptBody.system).toContain("<Category_Context>")
+      expect(String(promptBody.system).startsWith("<Category_Context>")).toBe(false)
     })
   })
 

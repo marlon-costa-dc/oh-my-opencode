@@ -39,12 +39,14 @@ export type {
   ModelResolutionProvenance,
   ModelResolutionResult as ModelResolutionPipelineResult,
 } from "./model-resolution-types"
+export { normalizeFallbackModels } from "./model-resolver"
 export * from "./model-availability"
 export * from "./connected-providers-cache"
 export * from "./session-utils"
 export * from "./tmux"
 export * from "./model-suggestion-retry"
 export * from "./opencode-server-auth"
+export { SessionCategoryRegistry } from "./session-category-registry"
 export * from "./port-utils"
 export * from "./git-worktree"
 export * from "./safe-create-hook"
