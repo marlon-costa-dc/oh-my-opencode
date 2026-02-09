@@ -8,10 +8,13 @@ import {
   HOOK_NAME,
   DEFAULT_MAX_ITERATIONS,
   DEFAULT_COMPLETION_PROMISE,
+  DEFAULT_STRATEGY,
 } from "./constants"
 import type { RalphLoopState, RalphLoopOptions } from "./types"
+import type { ContextStrategy } from "../../config"
 import { getTranscriptPath as getDefaultTranscriptPath } from "../claude-code-hooks/transcript"
 import { findNearestMessageWithFields, MESSAGE_STORAGE } from "../../features/hook-message-injector"
+import { RALPH_LOOP_TEMPLATE } from "../../features/builtin-commands/templates/ralph-loop"
 
 function getMessageDir(sessionID: string): string | null {
   if (!existsSync(MESSAGE_STORAGE)) return null
@@ -43,9 +46,7 @@ interface OpenCodeSessionMessage {
   }>
 }
 
-const CONTINUATION_PROMPT = `${SYSTEM_DIRECTIVE_PREFIX} - RALPH LOOP {{ITERATION}}/{{MAX}}]
-
-Your previous attempt did not output the completion promise. Continue working on the task.
+const CONTINUE_STRATEGY_PROMPT = `Your previous attempt did not output the completion promise. Continue working on the task.
 
 IMPORTANT:
 - Review your progress so far
@@ -56,12 +57,37 @@ IMPORTANT:
 Original task:
 {{PROMPT}}`
 
+function getResetStrategyPrompt(prompt: string): string {
+  return `<command-instruction>
+${RALPH_LOOP_TEMPLATE}
+</command-instruction>
+
+<user-task>
+${prompt}
+</user-task>`
+}
+
+function getIterationPrompt(
+  iteration: number,
+  max: number,
+  strategy: "reset" | "continue",
+  prompt: string
+): string {
+  if (strategy === "continue") {
+    const prefix = `${SYSTEM_DIRECTIVE_PREFIX} - RALPH LOOP ${iteration}/${max}]`
+    return `${prefix}\n\n${CONTINUE_STRATEGY_PROMPT}`
+      .replace("{{PROMPT}}", prompt)
+  }
+  const prefix = `[RALPH LOOP - Iteration ${iteration}/${max}]`
+  return `${prefix}\n\n${getResetStrategyPrompt(prompt)}`
+}
+
 export interface RalphLoopHook {
   event: (input: { event: { type: string; properties?: unknown } }) => Promise<void>
   startLoop: (
     sessionID: string,
     prompt: string,
-    options?: { maxIterations?: number; completionPromise?: string; ultrawork?: boolean }
+    options?: { maxIterations?: number; completionPromise?: string; ultrawork?: boolean; strategy?: ContextStrategy }
   ) => boolean
   cancelLoop: (sessionID: string) => boolean
   getState: () => RalphLoopState | null
@@ -161,7 +187,7 @@ export function createRalphLoopHook(
   const startLoop = (
     sessionID: string,
     prompt: string,
-    loopOptions?: { maxIterations?: number; completionPromise?: string; ultrawork?: boolean }
+    loopOptions?: { maxIterations?: number; completionPromise?: string; ultrawork?: boolean; strategy?: ContextStrategy }
   ): boolean => {
     const state: RalphLoopState = {
       active: true,
@@ -170,6 +196,7 @@ export function createRalphLoopHook(
         loopOptions?.maxIterations ?? config?.default_max_iterations ?? DEFAULT_MAX_ITERATIONS,
       completion_promise: loopOptions?.completionPromise ?? DEFAULT_COMPLETION_PROMISE,
       ultrawork: loopOptions?.ultrawork,
+      strategy: loopOptions?.strategy ?? config?.default_strategy ?? DEFAULT_STRATEGY,
       started_at: new Date().toISOString(),
       prompt,
       session_id: sessionID,
@@ -181,6 +208,7 @@ export function createRalphLoopHook(
         sessionID,
         maxIterations: state.max_iterations,
         completionPromise: state.completion_promise,
+        strategy: state.strategy,
       })
     }
     return success
@@ -318,14 +346,64 @@ export function createRalphLoopHook(
         max: newState.max_iterations,
       })
 
-      const continuationPrompt = CONTINUATION_PROMPT.replace("{{ITERATION}}", String(newState.iteration))
-        .replace("{{MAX}}", String(newState.max_iterations))
-        .replace("{{PROMISE}}", newState.completion_promise)
-        .replace("{{PROMPT}}", newState.prompt)
+      const strategy = newState.strategy ?? config?.default_strategy ?? DEFAULT_STRATEGY
+      let targetSessionID = sessionID
+
+      if (strategy === "reset") {
+        try {
+          log(`[${HOOK_NAME}] Creating new session for fresh context`, { sessionID })
+          const createResp = await ctx.client.session.create({
+            body: { title: `Ralph Loop - Iteration ${newState.iteration}` },
+            query: { directory: ctx.directory },
+          })
+          const newSessionID = (createResp as { data?: { id?: string } })?.data?.id
+          if (newSessionID) {
+            targetSessionID = newSessionID
+            const updatedState = { ...newState, session_id: newSessionID }
+            writeState(ctx.directory, updatedState, stateDir)
+            log(`[${HOOK_NAME}] Switched to new session`, { oldSessionID: sessionID, newSessionID })
+
+            // Switch TUI focus to the new session via raw API call
+            try {
+              const client = (ctx.client as unknown as { _client: { post: (opts: unknown) => Promise<unknown> } })._client
+              await client.post({
+                url: "/tui/select-session",
+                body: { sessionID: newSessionID },
+                query: { directory: ctx.directory },
+                headers: { "Content-Type": "application/json" },
+              })
+              log(`[${HOOK_NAME}] TUI switched to new session`, { newSessionID })
+            } catch (tuiErr) {
+              log(`[${HOOK_NAME}] TUI session switch failed (continuing anyway)`, {
+                newSessionID,
+                error: String(tuiErr),
+              })
+            }
+          } else {
+            log(`[${HOOK_NAME}] Failed to create new session, using original`, { sessionID })
+          }
+        } catch (err) {
+          log(`[${HOOK_NAME}] Session creation failed, using original session`, {
+            sessionID,
+            error: String(err),
+          })
+        }
+      }
+
+      let iterationPrompt = getIterationPrompt(
+        newState.iteration,
+        newState.max_iterations,
+        strategy,
+        newState.prompt
+      )
+
+      if (strategy === "continue") {
+        iterationPrompt = iterationPrompt.replace("{{PROMISE}}", newState.completion_promise)
+      }
 
       const finalPrompt = newState.ultrawork
-        ? `ultrawork ${continuationPrompt}`
-        : continuationPrompt
+        ? `ultrawork ${iterationPrompt}`
+        : iterationPrompt
 
       await ctx.client.tui
         .showToast({
@@ -364,8 +442,8 @@ export function createRalphLoopHook(
             : undefined
         }
 
-        await ctx.client.session.prompt({
-          path: { id: sessionID },
+        await ctx.client.session.promptAsync({
+          path: { id: targetSessionID },
           body: {
             ...(agent !== undefined ? { agent } : {}),
             ...(model !== undefined ? { model } : {}),
@@ -375,7 +453,7 @@ export function createRalphLoopHook(
         })
       } catch (err) {
         log(`[${HOOK_NAME}] Failed to inject continuation`, {
-          sessionID,
+          sessionID: targetSessionID,
           error: String(err),
         })
       }

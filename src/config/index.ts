@@ -10,6 +10,7 @@ export {
   ExperimentalConfigSchema,
   RalphLoopConfigSchema,
   BoulderLoopConfigSchema,
+  ContextStrategySchema,
   TmuxConfigSchema,
   TmuxLayoutSchema,
 } from "./schema"
@@ -27,6 +28,7 @@ export type {
   DynamicContextPruningConfig,
   RalphLoopConfig,
   BoulderLoopConfig,
+  ContextStrategy,
   TmuxConfig,
   TmuxLayout,
   SisyphusConfig,
