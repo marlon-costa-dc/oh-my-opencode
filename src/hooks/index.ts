@@ -48,3 +48,5 @@ export { createPreemptiveCompactionHook } from "./preemptive-compaction";
 export { createTasksTodowriteDisablerHook } from "./tasks-todowrite-disabler";
 export { createWriteExistingFileGuardHook } from "./write-existing-file-guard";
 export { createRuntimeFallbackHook, type RuntimeFallbackHook, type RuntimeFallbackOptions } from "./runtime-fallback";
+export { createLoopDetectorHook } from "./loop-detector";
+export { createDefinitionGatesHook } from "./definition-gates";
