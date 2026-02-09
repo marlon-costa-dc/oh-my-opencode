@@ -60,6 +60,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
     safeHookEnabled,
     mergedSkills: toolsResult.mergedSkills,
     availableSkills: toolsResult.availableSkills,
+    modelCacheState,
   })
 
   const pluginInterface = createPluginInterface({

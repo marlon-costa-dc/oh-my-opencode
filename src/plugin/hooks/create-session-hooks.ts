@@ -34,6 +34,8 @@ import {
 import { safeCreateHook } from "../../shared/safe-create-hook"
 import { sessionExists } from "../../tools"
 
+import type { ModelCacheState } from "../../plugin-state"
+
 export type SessionHooks = {
   contextWindowMonitor: ReturnType<typeof createContextWindowMonitorHook> | null
   preemptiveCompaction: ReturnType<typeof createPreemptiveCompactionHook> | null
@@ -65,19 +67,20 @@ export function createSessionHooks(args: {
   pluginConfig: OhMyOpenCodeConfig
   isHookEnabled: (hookName: HookName) => boolean
   safeHookEnabled: boolean
+  modelCacheState: ModelCacheState
 }): SessionHooks {
-  const { ctx, pluginConfig, isHookEnabled, safeHookEnabled } = args
+  const { ctx, pluginConfig, isHookEnabled, safeHookEnabled, modelCacheState } = args
   const safeHook = <T>(hookName: HookName, factory: () => T): T | null =>
     safeCreateHook(hookName, factory, { enabled: safeHookEnabled })
 
   const contextWindowMonitor = isHookEnabled("context-window-monitor")
-    ? safeHook("context-window-monitor", () => createContextWindowMonitorHook(ctx))
+    ? safeHook("context-window-monitor", () => createContextWindowMonitorHook(ctx, modelCacheState))
     : null
 
   const preemptiveCompaction =
     isHookEnabled("preemptive-compaction") &&
     pluginConfig.experimental?.preemptive_compaction
-      ? safeHook("preemptive-compaction", () => createPreemptiveCompactionHook(ctx))
+      ? safeHook("preemptive-compaction", () => createPreemptiveCompactionHook(ctx, modelCacheState))
       : null
 
   const sessionRecovery = isHookEnabled("session-recovery")

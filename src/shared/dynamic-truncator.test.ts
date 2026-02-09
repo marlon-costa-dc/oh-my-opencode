@@ -1,0 +1,216 @@
+import { describe, expect, test, mock } from "bun:test"
+import {
+  getContextWindowUsage,
+  truncateToTokenLimit,
+  createDynamicTruncator,
+} from "./dynamic-truncator"
+
+function createMockCtx(messagesData: Array<{
+  info: {
+    role: string
+    providerID?: string
+    modelID?: string
+    tokens?: {
+      input: number
+      output: number
+      reasoning: number
+      cache: { read: number; write: number }
+    }
+  }
+}>) {
+  return {
+    client: {
+      session: {
+        messages: mock(() =>
+          Promise.resolve({
+            data: messagesData,
+          }),
+        ),
+      },
+    },
+  } as any
+}
+
+describe("getContextWindowUsage", () => {
+  test("returns remainingTokens using model cache limit", async () => {
+    //#given
+    const mockCtx = createMockCtx([
+      {
+        info: {
+          role: "assistant",
+          tokens: {
+            input: 150000,
+            output: 5000,
+            reasoning: 0,
+            cache: { read: 10000, write: 0 },
+          },
+        },
+      },
+    ])
+    const limitOptions = {
+      modelContextLimitsCache: new Map([["anthropic/claude-sonnet-4-5", 1_000_000]]),
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-5",
+    }
+
+    //#when
+    const usage = await getContextWindowUsage(mockCtx, "session-1", limitOptions)
+
+    //#then
+    expect(usage).not.toBeNull()
+    expect(usage!.usedTokens).toBe(165000)
+    expect(usage!.remainingTokens).toBe(835000)
+  })
+
+  test("returns usagePercentage using model cache limit", async () => {
+    //#given
+    const mockCtx = createMockCtx([
+      {
+        info: {
+          role: "assistant",
+          tokens: {
+            input: 150000,
+            output: 5000,
+            reasoning: 0,
+            cache: { read: 10000, write: 0 },
+          },
+        },
+      },
+    ])
+    const limitOptions = {
+      modelContextLimitsCache: new Map([["anthropic/claude-sonnet-4-5", 1_000_000]]),
+      providerID: "anthropic",
+      modelID: "claude-sonnet-4-5",
+    }
+
+    //#when
+    const usage = await getContextWindowUsage(mockCtx, "session-1", limitOptions)
+
+    //#then
+    expect(usage).not.toBeNull()
+    expect(usage!.usagePercentage).toBeCloseTo(0.165, 6)
+  })
+
+  test("returns null when there are no assistant messages", async () => {
+    //#given
+    const mockCtx = createMockCtx([
+      {
+        info: {
+          role: "user",
+        },
+      },
+    ])
+
+    //#when
+    const usage = await getContextWindowUsage(mockCtx, "session-2")
+
+    //#then
+    expect(usage).toBeNull()
+  })
+
+  test("extracts providerID/modelID from messages when not in limitOptions", async () => {
+    //#given
+    const mockCtx = createMockCtx([
+      {
+        info: {
+          role: "assistant",
+          providerID: "anthropic",
+          modelID: "claude-sonnet-4-5",
+          tokens: {
+            input: 150000,
+            output: 5000,
+            reasoning: 0,
+            cache: { read: 10000, write: 0 },
+          },
+        },
+      },
+    ])
+    const limitOptions = {
+      modelContextLimitsCache: new Map([["anthropic/claude-sonnet-4-5", 1_000_000]]),
+    }
+
+    //#when
+    const usage = await getContextWindowUsage(mockCtx, "session-extract", limitOptions)
+
+    //#then
+    expect(usage).not.toBeNull()
+    expect(usage!.usedTokens).toBe(165000)
+    expect(usage!.remainingTokens).toBe(835000)
+    expect(usage!.usagePercentage).toBeCloseTo(0.165, 6)
+  })
+
+  test("falls back to default when message has no providerID/modelID", async () => {
+    //#given
+    const mockCtx = createMockCtx([
+      {
+        info: {
+          role: "assistant",
+          tokens: {
+            input: 150000,
+            output: 5000,
+            reasoning: 0,
+            cache: { read: 10000, write: 0 },
+          },
+        },
+      },
+    ])
+    const limitOptions = {
+      modelContextLimitsCache: new Map([["anthropic/claude-sonnet-4-5", 1_000_000]]),
+    }
+
+    //#when
+    const usage = await getContextWindowUsage(mockCtx, "session-no-provider", limitOptions)
+
+    //#then
+    expect(usage).not.toBeNull()
+    expect(usage!.remainingTokens).toBe(35000)
+  })
+
+  test("uses 200k denominator when env var is unset and model cache is not used", async () => {
+    //#given
+    const mockCtx = createMockCtx([
+      {
+        info: {
+          role: "assistant",
+          tokens: {
+            input: 150000,
+            output: 5000,
+            reasoning: 0,
+            cache: { read: 10000, write: 0 },
+          },
+        },
+      },
+    ])
+    const truncator = createDynamicTruncator(mockCtx)
+
+    //#when
+    const usage = await truncator.getUsage("session-3")
+
+    //#then
+    expect(usage).not.toBeNull()
+    expect(usage!.usedTokens).toBe(165000)
+    expect(usage!.remainingTokens).toBe(35000)
+    expect(usage!.usagePercentage).toBeCloseTo(0.825, 6)
+  })
+})
+
+describe("truncateToTokenLimit", () => {
+  test("correctly truncates output exceeding max tokens", () => {
+    //#given
+    const output = [
+      "Header 1",
+      "Header 2",
+      "Header 3",
+      "A".repeat(2000),
+      "B".repeat(2000),
+    ].join("\n")
+
+    //#when
+    const result = truncateToTokenLimit(output, 100, 3)
+
+    //#then
+    expect(result.truncated).toBe(true)
+    expect(result.removedCount).toBeGreaterThanOrEqual(1)
+    expect(result.result).toContain("truncated due to context window limit")
+  })
+})

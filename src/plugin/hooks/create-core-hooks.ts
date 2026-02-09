@@ -5,19 +5,23 @@ import { createSessionHooks } from "./create-session-hooks"
 import { createToolGuardHooks } from "./create-tool-guard-hooks"
 import { createTransformHooks } from "./create-transform-hooks"
 
+import type { ModelCacheState } from "../../plugin-state"
+
 export function createCoreHooks(args: {
   ctx: PluginContext
   pluginConfig: OhMyOpenCodeConfig
   isHookEnabled: (hookName: HookName) => boolean
   safeHookEnabled: boolean
+  modelCacheState: ModelCacheState
 }) {
-  const { ctx, pluginConfig, isHookEnabled, safeHookEnabled } = args
+  const { ctx, pluginConfig, isHookEnabled, safeHookEnabled, modelCacheState } = args
 
   const session = createSessionHooks({
     ctx,
     pluginConfig,
     isHookEnabled,
     safeHookEnabled,
+    modelCacheState,
   })
 
   const tool = createToolGuardHooks({
@@ -25,6 +29,7 @@ export function createCoreHooks(args: {
     pluginConfig,
     isHookEnabled,
     safeHookEnabled,
+    modelCacheState,
   })
 
   const transform = createTransformHooks({

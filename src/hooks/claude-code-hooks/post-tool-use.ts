@@ -59,9 +59,9 @@ export async function executePostToolUseHooks(
   // PORT FROM DISABLED: Build Claude Code compatible transcript (temp file)
   let tempTranscriptPath: string | null = null
 
-  try {
-    // Try to build full transcript from API if client available
-    if (ctx.client) {
+  // Try to build full transcript from API if client available
+  if (ctx.client) {
+    try {
       tempTranscriptPath = await buildTranscriptFromSession(
         ctx.client,
         ctx.sessionId,
@@ -69,9 +69,12 @@ export async function executePostToolUseHooks(
         ctx.toolName,
         ctx.toolInput
       )
+    } catch {
+      // Ignore errors if building transcript fails
     }
+  }
 
-    const stdinData: PostToolUseInput = {
+  const stdinData: PostToolUseInput = {
       session_id: ctx.sessionId,
       // Use temp transcript if available, otherwise fallback to append-based
       transcript_path: tempTranscriptPath ?? ctx.transcriptPath,

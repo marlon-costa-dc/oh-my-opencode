@@ -1,10 +1,5 @@
-const DEFAULT_ACTUAL_LIMIT = 200_000
-
-const ANTHROPIC_ACTUAL_LIMIT =
-  process.env.ANTHROPIC_1M_CONTEXT === "true" ||
-  process.env.VERTEX_ANTHROPIC_1M_CONTEXT === "true"
-    ? 1_000_000
-    : DEFAULT_ACTUAL_LIMIT
+import type { ModelCacheState } from "../plugin-state"
+import { resolveContextWindowLimit } from "../shared/context-window-limit-resolver"
 
 const PREEMPTIVE_COMPACTION_THRESHOLD = 0.78
 
@@ -12,6 +7,7 @@ interface AssistantMessageInfo {
   role: "assistant"
   providerID: string
   modelID?: string
+  contextWindowLimit?: number
   tokens: {
     input: number
     output: number
@@ -37,7 +33,7 @@ type PluginInput = {
   directory: string
 }
 
-export function createPreemptiveCompactionHook(ctx: PluginInput) {
+export function createPreemptiveCompactionHook(ctx: PluginInput, modelCacheState?: ModelCacheState) {
   const compactionInProgress = new Set<string>()
   const compactedSessions = new Set<string>()
 
@@ -61,14 +57,16 @@ export function createPreemptiveCompactionHook(ctx: PluginInput) {
       if (assistantMessages.length === 0) return
 
       const lastAssistant = assistantMessages[assistantMessages.length - 1]
-      const actualLimit =
-        lastAssistant.providerID === "anthropic"
-          ? ANTHROPIC_ACTUAL_LIMIT
-          : DEFAULT_ACTUAL_LIMIT
 
       const lastTokens = lastAssistant.tokens
       const totalInputTokens = (lastTokens?.input ?? 0) + (lastTokens?.cache?.read ?? 0)
-      const usageRatio = totalInputTokens / actualLimit
+      const effectiveLimit = resolveContextWindowLimit({
+        contextWindowLimit: lastAssistant.contextWindowLimit,
+        providerID: lastAssistant.providerID,
+        modelID: lastAssistant.modelID,
+        modelContextLimitsCache: modelCacheState?.modelContextLimitsCache,
+      })
+      const usageRatio = totalInputTokens / effectiveLimit
 
       if (usageRatio < PREEMPTIVE_COMPACTION_THRESHOLD) return
 

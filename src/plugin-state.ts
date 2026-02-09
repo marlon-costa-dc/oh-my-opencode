@@ -1,6 +1,6 @@
 export interface ModelCacheState {
   modelContextLimitsCache: Map<string, number>;
-  anthropicContext1MEnabled: boolean;
+  anthropicContext1MEnabled?: boolean;
 }
 
 export function createModelCacheState(): ModelCacheState {

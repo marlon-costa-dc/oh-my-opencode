@@ -8,6 +8,8 @@ import { createCoreHooks } from "./plugin/hooks/create-core-hooks"
 import { createContinuationHooks } from "./plugin/hooks/create-continuation-hooks"
 import { createSkillHooks } from "./plugin/hooks/create-skill-hooks"
 
+import type { ModelCacheState } from "./plugin-state"
+
 export type CreatedHooks = ReturnType<typeof createHooks>
 
 export function createHooks(args: {
@@ -18,6 +20,7 @@ export function createHooks(args: {
   safeHookEnabled: boolean
   mergedSkills: LoadedSkill[]
   availableSkills: AvailableSkill[]
+  modelCacheState: ModelCacheState
 }) {
   const {
     ctx,
@@ -27,6 +30,7 @@ export function createHooks(args: {
     safeHookEnabled,
     mergedSkills,
     availableSkills,
+    modelCacheState,
   } = args
 
   const core = createCoreHooks({
@@ -34,6 +38,7 @@ export function createHooks(args: {
     pluginConfig,
     isHookEnabled,
     safeHookEnabled,
+    modelCacheState,
   })
 
   const continuation = createContinuationHooks({

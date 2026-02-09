@@ -186,7 +186,6 @@ describe("Plan agent demote behavior", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -223,7 +222,6 @@ describe("Plan agent demote behavior", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -260,7 +258,6 @@ describe("Plan agent demote behavior", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -291,7 +288,6 @@ describe("Plan agent demote behavior", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -326,7 +322,6 @@ describe("Agent permission defaults", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -469,7 +464,6 @@ describe("Prometheus direct override priority over category", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -509,7 +503,6 @@ describe("Prometheus direct override priority over category", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -550,7 +543,6 @@ describe("Prometheus direct override priority over category", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -585,7 +577,6 @@ describe("Prometheus direct override priority over category", () => {
       ctx: { directory: "/tmp" },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })
@@ -808,7 +799,6 @@ describe("Deadlock prevention - fetchAvailableModels must not receive client", (
       ctx: { directory: "/tmp", client: mockClient },
       pluginConfig,
       modelCacheState: {
-        anthropicContext1MEnabled: false,
         modelContextLimitsCache: new Map(),
       },
     })

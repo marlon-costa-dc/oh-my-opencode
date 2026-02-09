@@ -22,6 +22,8 @@ import {
 } from "../../shared"
 import { safeCreateHook } from "../../shared/safe-create-hook"
 
+import type { ModelCacheState } from "../../plugin-state"
+
 export type ToolGuardHooks = {
   commentChecker: ReturnType<typeof createCommentCheckerHooks> | null
   toolOutputTruncator: ReturnType<typeof createToolOutputTruncatorHook> | null
@@ -41,8 +43,9 @@ export function createToolGuardHooks(args: {
   pluginConfig: OhMyOpenCodeConfig
   isHookEnabled: (hookName: HookName) => boolean
   safeHookEnabled: boolean
+  modelCacheState: ModelCacheState
 }): ToolGuardHooks {
-  const { ctx, pluginConfig, isHookEnabled, safeHookEnabled } = args
+  const { ctx, pluginConfig, isHookEnabled, safeHookEnabled, modelCacheState } = args
   const safeHook = <T>(hookName: HookName, factory: () => T): T | null =>
     safeCreateHook(hookName, factory, { enabled: safeHookEnabled })
 
@@ -52,7 +55,7 @@ export function createToolGuardHooks(args: {
 
   const toolOutputTruncator = isHookEnabled("tool-output-truncator")
     ? safeHook("tool-output-truncator", () =>
-        createToolOutputTruncatorHook(ctx, { experimental: pluginConfig.experimental }))
+        createToolOutputTruncatorHook(ctx, { experimental: pluginConfig.experimental }, modelCacheState))
     : null
 
   let directoryAgentsInjector: ReturnType<typeof createDirectoryAgentsInjectorHook> | null = null

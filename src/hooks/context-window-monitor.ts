@@ -1,12 +1,7 @@
 import type { PluginInput } from "@opencode-ai/plugin"
 import { createSystemDirective, SystemDirectiveTypes } from "../shared/system-directive"
-
-const ANTHROPIC_DISPLAY_LIMIT = 1_000_000
-const ANTHROPIC_ACTUAL_LIMIT =
-  process.env.ANTHROPIC_1M_CONTEXT === "true" ||
-  process.env.VERTEX_ANTHROPIC_1M_CONTEXT === "true"
-    ? 1_000_000
-    : 200_000
+import { resolveContextWindowLimit, isAnthropicProvider } from "../shared/context-window-limit-resolver"
+import type { ModelCacheState } from "../plugin-state"
 
 const PROGRESSIVE_WARNING_THRESHOLDS = [0.50, 0.60, 0.70, 0.80] as const
 
@@ -64,6 +59,8 @@ You have sufficient context remaining - continue working normally.${ANSI.RESET}`
 interface AssistantMessageInfo {
   role: "assistant"
   providerID: string
+  modelID?: string
+  contextWindowLimit?: number
   tokens: {
     input: number
     output: number
@@ -76,7 +73,10 @@ interface MessageWrapper {
   info: { role: string } & Partial<AssistantMessageInfo>
 }
 
-export function createContextWindowMonitorHook(ctx: PluginInput) {
+export function createContextWindowMonitorHook(
+  ctx: PluginInput,
+  modelCacheState?: ModelCacheState,
+) {
   const notifiedThresholdsPerSession = new Map<string, Set<ThresholdLevel>>()
 
   const toolExecuteAfter = async (
@@ -99,11 +99,18 @@ export function createContextWindowMonitorHook(ctx: PluginInput) {
       if (assistantMessages.length === 0) return
 
       const lastAssistant = assistantMessages[assistantMessages.length - 1]
-      if (lastAssistant.providerID !== "anthropic") return
+      if (!isAnthropicProvider(lastAssistant.providerID)) return
+
+      const effectiveLimit = resolveContextWindowLimit({
+        contextWindowLimit: lastAssistant.contextWindowLimit,
+        providerID: lastAssistant.providerID,
+        modelID: lastAssistant.modelID,
+        modelContextLimitsCache: modelCacheState?.modelContextLimitsCache,
+      })
 
       const lastTokens = lastAssistant.tokens
       const totalInputTokens = (lastTokens?.input ?? 0) + (lastTokens?.cache?.read ?? 0)
-      const actualUsagePercentage = totalInputTokens / ANTHROPIC_ACTUAL_LIMIT
+      const actualUsagePercentage = totalInputTokens / effectiveLimit
 
       if (!notifiedThresholdsPerSession.has(sessionID)) {
         notifiedThresholdsPerSession.set(sessionID, new Set())
@@ -126,11 +133,10 @@ export function createContextWindowMonitorHook(ctx: PluginInput) {
       }
 
       const { color } = THRESHOLD_CONFIG[thresholdToNotify]
-      const displayUsagePercentage = totalInputTokens / ANTHROPIC_DISPLAY_LIMIT
-      const usedPct = (displayUsagePercentage * 100).toFixed(1)
-      const remainingPct = ((1 - displayUsagePercentage) * 100).toFixed(1)
+      const usedPct = (actualUsagePercentage * 100).toFixed(1)
+      const remainingPct = ((1 - actualUsagePercentage) * 100).toFixed(1)
       const usedTokens = totalInputTokens.toLocaleString()
-      const limitTokens = ANTHROPIC_DISPLAY_LIMIT.toLocaleString()
+      const limitTokens = effectiveLimit.toLocaleString()
 
       const reminder = createContextReminder(thresholdToNotify)
 
