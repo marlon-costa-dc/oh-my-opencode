@@ -13,6 +13,8 @@ import {
   createInteractiveBashSessionHook,
   createRalphLoopHook,
   createReviewLoopHook,
+  createBoulderLoopHook,
+  createBoulderQuestionAutoAnswerHook,
   createEditErrorRecoveryHook,
   createDelegateTaskRetryHook,
   createTaskResumeInfoHook,
@@ -45,6 +47,8 @@ export type SessionHooks = {
   interactiveBashSession: ReturnType<typeof createInteractiveBashSessionHook> | null
   ralphLoop: ReturnType<typeof createRalphLoopHook> | null
   reviewLoop: ReturnType<typeof createReviewLoopHook> | null
+  boulderLoop: ReturnType<typeof createBoulderLoopHook> | null
+  boulderQuestionAutoAnswer: ReturnType<typeof createBoulderQuestionAutoAnswerHook> | null
   editErrorRecovery: ReturnType<typeof createEditErrorRecoveryHook> | null
   delegateTaskRetry: ReturnType<typeof createDelegateTaskRetryHook> | null
   startWork: ReturnType<typeof createStartWorkHook> | null
@@ -138,6 +142,18 @@ export function createSessionHooks(args: {
         }))
     : null
 
+  const boulderLoop = isHookEnabled("boulder-loop")
+    ? safeHook("boulder-loop", () =>
+        createBoulderLoopHook(ctx, {
+          config: pluginConfig.boulder_loop,
+          checkSessionExists: async (sessionId) => sessionExists(sessionId),
+        }))
+    : null
+
+  const boulderQuestionAutoAnswer = isHookEnabled("boulder-question-auto-answer")
+    ? safeHook("boulder-question-auto-answer", () => createBoulderQuestionAutoAnswerHook(ctx.directory, pluginConfig.boulder_loop?.state_dir))
+    : null
+
   const editErrorRecovery = isHookEnabled("edit-error-recovery")
     ? safeHook("edit-error-recovery", () => createEditErrorRecoveryHook(ctx))
     : null
@@ -179,6 +195,8 @@ export function createSessionHooks(args: {
     interactiveBashSession,
     ralphLoop,
     reviewLoop,
+    boulderLoop,
+    boulderQuestionAutoAnswer,
     editErrorRecovery,
     delegateTaskRetry,
     startWork,

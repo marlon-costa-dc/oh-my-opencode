@@ -2,6 +2,7 @@ import type { CommandDefinition } from "../claude-code-command-loader"
 import type { BuiltinCommandName, BuiltinCommands } from "./types"
 import { INIT_DEEP_TEMPLATE } from "./templates/init-deep"
 import { RALPH_LOOP_TEMPLATE, CANCEL_RALPH_TEMPLATE } from "./templates/ralph-loop"
+import { BOULDER_LOOP_TEMPLATE, CANCEL_BOULDER_TEMPLATE } from "./templates/boulder-loop"
 import { STOP_CONTINUATION_TEMPLATE } from "./templates/stop-continuation"
 import { REFACTOR_TEMPLATE } from "./templates/refactor"
 import { START_WORK_TEMPLATE } from "./templates/start-work"
@@ -105,6 +106,23 @@ ${REVIEW_LOOP_TEMPLATE}
 $ARGUMENTS
 </user-task>`,
     argumentHint: "[target-branch]",
+  },
+  "boulder": {
+    description: "(builtin) Start time-based development loop until deadline",
+    template: `<command-instruction>
+${BOULDER_LOOP_TEMPLATE}
+</command-instruction>
+
+<user-task>
+$ARGUMENTS
+</user-task>`,
+    argumentHint: '"task description" --until=HH:MM or --hours=N',
+  },
+  "cancel-boulder": {
+    description: "(builtin) Cancel active Boulder Loop",
+    template: `<command-instruction>
+${CANCEL_BOULDER_TEMPLATE}
+</command-instruction>`,
   },
 }
 
