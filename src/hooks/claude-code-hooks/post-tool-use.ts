@@ -193,8 +193,4 @@ export async function executePostToolUseHooks(
       hookName: firstHookName,
       toolName: transformedToolName,
     }
-  } finally {
-    // PORT FROM DISABLED: Cleanup temp file to avoid disk accumulation
-    deleteTempTranscript(tempTranscriptPath)
-  }
 }

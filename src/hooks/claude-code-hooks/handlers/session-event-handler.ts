@@ -9,6 +9,7 @@ import {
 	sessionErrorState,
 	sessionInterruptState,
 } from "../session-hook-state"
+import { clearCachedClaudeTranscript } from "../transcript"
 
 export function createSessionEventHandler(ctx: PluginInput, config: PluginConfig) {
 	return async (input: { event: { type: string; properties?: unknown } }) => {
@@ -31,6 +32,7 @@ export function createSessionEventHandler(ctx: PluginInput, config: PluginConfig
 			const sessionInfo = props?.info as { id?: string } | undefined
 			if (sessionInfo?.id) {
 				clearSessionHookState(sessionInfo.id)
+				clearCachedClaudeTranscript(sessionInfo.id)
 			}
 			return
 		}
