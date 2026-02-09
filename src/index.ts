@@ -337,7 +337,7 @@ const OhMyOpenCodePlugin: Plugin = async (ctx) => {
   );
 
   const atlasHook = isHookEnabled("atlas")
-    ? createAtlasHook(ctx, { directory: ctx.directory, backgroundManager })
+    ? createAtlasHook(ctx, { directory: ctx.directory, backgroundManager, sisyphusConfig: pluginConfig.sisyphus_agent })
     : null;
 
   const boulderLoop = isHookEnabled("boulder-loop")
