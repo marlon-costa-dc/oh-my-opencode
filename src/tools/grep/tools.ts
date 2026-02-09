@@ -23,8 +23,8 @@ export const grep: ToolDefinition = tool({
   execute: async (args, ctx) => {
     try {
       const globs = args.include ? [args.include] : undefined
-      // Use ctx.directory as the default search path when no path is provided
-      const searchPath = args.path ?? ctx.directory
+      // Use process.cwd() as the default search path when no path is provided
+      const searchPath = args.path ?? process.cwd()
       const paths = [searchPath]
 
       const result = await runRg({
