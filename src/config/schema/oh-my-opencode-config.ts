@@ -16,6 +16,7 @@ import { HookNameSchema } from "./hooks"
 import { NotificationConfigSchema } from "./notification"
 import { RalphLoopConfigSchema } from "./ralph-loop"
 import { ReviewLoopConfigSchema } from "./review-loop"
+import { RuntimeFallbackConfigSchema } from "./runtime-fallback"
 import { SkillsConfigSchema } from "./skills"
 import { SisyphusConfigSchema } from "./sisyphus"
 import { SisyphusAgentConfigSchema } from "./sisyphus-agent"
@@ -47,6 +48,7 @@ export const OhMyOpenCodeConfigSchema = z.object({
   review_loop: ReviewLoopConfigSchema.optional(),
   boulder_loop: BoulderLoopConfigSchema.optional(),
   background_task: BackgroundTaskConfigSchema.optional(),
+  runtime_fallback: RuntimeFallbackConfigSchema.optional(),
   notification: NotificationConfigSchema.optional(),
   babysitting: BabysittingConfigSchema.optional(),
   git_master: GitMasterConfigSchema.optional(),

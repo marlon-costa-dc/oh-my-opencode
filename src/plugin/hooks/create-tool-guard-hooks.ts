@@ -10,6 +10,9 @@ import {
   createRulesInjectorHook,
   createTasksTodowriteDisablerHook,
   createWriteExistingFileGuardHook,
+  createRuntimeFallbackHook,
+  createLoopDetectorHook,
+  createDefinitionGatesHook,
 } from "../../hooks"
 import {
   getOpenCodeVersion,
@@ -28,6 +31,9 @@ export type ToolGuardHooks = {
   rulesInjector: ReturnType<typeof createRulesInjectorHook> | null
   tasksTodowriteDisabler: ReturnType<typeof createTasksTodowriteDisablerHook> | null
   writeExistingFileGuard: ReturnType<typeof createWriteExistingFileGuardHook> | null
+  runtimeFallback: ReturnType<typeof createRuntimeFallbackHook> | null
+  loopDetector: ReturnType<typeof createLoopDetectorHook> | null
+  definitionGates: ReturnType<typeof createDefinitionGatesHook> | null
 }
 
 export function createToolGuardHooks(args: {
@@ -85,6 +91,22 @@ export function createToolGuardHooks(args: {
     ? safeHook("write-existing-file-guard", () => createWriteExistingFileGuardHook(ctx))
     : null
 
+  const runtimeFallback = isHookEnabled("runtime-fallback")
+    ? safeHook("runtime-fallback", () =>
+        createRuntimeFallbackHook(ctx, {
+          config: pluginConfig.runtime_fallback,
+          pluginConfig,
+        }))
+    : null
+
+  const loopDetector = isHookEnabled("loop-detector")
+    ? safeHook("loop-detector", () => createLoopDetectorHook(ctx))
+    : null
+
+  const definitionGates = isHookEnabled("definition-gates")
+    ? safeHook("definition-gates", () => createDefinitionGatesHook(ctx))
+    : null
+
   return {
     commentChecker,
     toolOutputTruncator,
@@ -94,5 +116,8 @@ export function createToolGuardHooks(args: {
     rulesInjector,
     tasksTodowriteDisabler,
     writeExistingFileGuard,
+    runtimeFallback,
+    loopDetector,
+    definitionGates,
   }
 }
