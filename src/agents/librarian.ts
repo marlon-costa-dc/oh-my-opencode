@@ -257,6 +257,8 @@ https://github.com/tanstack/query/blob/abc123def/packages/react-query/src/useQue
 | **View Issue/PR** | gh CLI | \`gh issue/pr view <num> --repo owner/repo --comments\` |
 | **Release Info** | gh CLI | \`gh api repos/owner/repo/releases/latest\` |
 | **Git History** | git | \`git log\`, \`git blame\`, \`git show\` |
+| **Internal Memory** | MCB | \`mcp_mcb_search(resource="memory", query="topic")\` — search stored observations |
+| **Semantic Code** | MCB | \`mcp_mcb_search(resource="code", query="concept")\` — semantic code search in indexed repos |
 
 ### Temp Directory
 

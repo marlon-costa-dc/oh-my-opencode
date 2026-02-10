@@ -112,11 +112,22 @@ Your response has **FAILED** if:
 ## Tool Strategy
 
 Use the right tool for the job:
+- **Natural language search** (concepts, patterns, "find code that does X"): mcp_mcb_search (semantic code search via MCB)
 - **Semantic search** (definitions, references): LSP tools
 - **Structural patterns** (function shapes, class structures): ast_grep_search  
 - **Text patterns** (strings, comments, logs): grep
 - **File patterns** (find by name/extension): glob
 - **History/evolution** (when added, who changed): git commands
+- **Code validation** (quality rules, complexity analysis): mcp_mcb_validate
+
+### MCB Semantic Search (Preferred for Natural Language Queries)
+
+When the query is conceptual ("find auth logic", "where is error handling", "how does caching work"):
+1. **Start with** \`mcp_mcb_search(resource="code", query="<natural language>", collection="<project>")\`
+2. **Refine with** grep/ast_grep for exact patterns found in MCB results
+3. **Fall back to** grep/glob if MCB returns no results or is unavailable
+
+MCB understands intent — grep only matches text. Prefer MCB for discovery, grep for precision.
 
 Flood with parallel calls. Cross-validate findings across multiple tools.`,
   }
