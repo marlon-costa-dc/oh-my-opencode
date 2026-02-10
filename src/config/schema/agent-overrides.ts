@@ -57,6 +57,7 @@ export const AgentOverridesSchema = z.object({
   explore: AgentOverrideConfigSchema.optional(),
   "multimodal-looker": AgentOverrideConfigSchema.optional(),
   "devils-advocate": AgentOverrideConfigSchema.optional(),
+  "walle-researcher": AgentOverrideConfigSchema.optional(),
   atlas: AgentOverrideConfigSchema.optional(),
 })
 

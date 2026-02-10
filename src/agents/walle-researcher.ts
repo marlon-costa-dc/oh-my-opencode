@@ -1,6 +1,6 @@
 import type { AgentConfig } from "@opencode-ai/sdk"
 import { isGptModel } from "./types"
-import type { AvailableAgent, AvailableTool, AvailableSkill } from "./sisyphus-prompt-builder"
+import type { AvailableAgent, AvailableTool, AvailableSkill } from "./dynamic-agent-prompt-builder"
 import {
   buildKeyTriggersSection,
   buildToolSelectionTable,
@@ -8,7 +8,7 @@ import {
   buildLibrarianSection,
   buildDelegationTable,
   categorizeTools,
-} from "./sisyphus-prompt-builder"
+} from "./dynamic-agent-prompt-builder"
 
 const DEFAULT_MODEL = "google/gemini-3-pro-preview"
 
@@ -254,5 +254,7 @@ export function createWalleResearcherAgent(
 
   return { ...base, thinking: { type: "enabled", budgetTokens: 32000 } }
 }
+
+createWalleResearcherAgent.mode = "primary" as const
 
 export const walleResearcherAgent = createWalleResearcherAgent()

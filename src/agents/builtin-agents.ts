@@ -9,6 +9,7 @@ import { createLibrarianAgent, LIBRARIAN_PROMPT_METADATA } from "./librarian"
 import { createExploreAgent, EXPLORE_PROMPT_METADATA } from "./explore"
 import { createMultimodalLookerAgent, MULTIMODAL_LOOKER_PROMPT_METADATA } from "./multimodal-looker"
 import { createDevilsAdvocateAgent, DEVILS_ADVOCATE_PROMPT_METADATA } from "./devils-advocate"
+import { createWalleResearcherAgent } from "./walle-researcher"
 import { createMetisAgent, metisPromptMetadata } from "./metis"
 import { createAtlasAgent, atlasPromptMetadata } from "./atlas"
 import { createMomusAgent, momusPromptMetadata } from "./momus"
@@ -33,6 +34,7 @@ const agentSources: Record<BuiltinAgentName, AgentSource> = {
   explore: createExploreAgent,
   "multimodal-looker": createMultimodalLookerAgent,
   "devils-advocate": createDevilsAdvocateAgent,
+  "walle-researcher": createWalleResearcherAgent,
   metis: createMetisAgent,
   momus: createMomusAgent,
   // Note: Atlas is handled specially in createBuiltinAgents()

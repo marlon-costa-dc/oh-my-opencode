@@ -77,17 +77,11 @@ export type BuiltinAgentName =
   | "librarian"
   | "explore"
   | "multimodal-looker"
-<<<<<<< HEAD
   | "metis"
   | "momus"
   | "atlas"
   | "devils-advocate"
-=======
-  | "Metis (Plan Consultant)"
-  | "Momus (Plan Reviewer)"
-  | "orchestrator-sisyphus"
-  | "Walle-Researcher"
->>>>>>> ruslan-kurchenko/personal
+  | "walle-researcher"
 
 export type OverridableAgentName =
   | "build"
