@@ -15,6 +15,7 @@ export function _resetForTesting(): void {
   _mainSessionID = undefined
   subagentSessions.clear()
   sessionAgentMap.clear()
+  registeredAgentNames.clear()
 }
 
 const sessionAgentMap = new Map<string, string>()
@@ -35,4 +36,17 @@ export function getSessionAgent(sessionID: string): string | undefined {
 
 export function clearSessionAgent(sessionID: string): void {
   sessionAgentMap.delete(sessionID)
+}
+
+const registeredAgentNames = new Set<string>()
+
+export function setRegisteredAgents(names: string[]): void {
+  registeredAgentNames.clear()
+  for (const name of names) {
+    registeredAgentNames.add(name.toLowerCase())
+  }
+}
+
+export function isAgentRegistered(name: string): boolean {
+  return registeredAgentNames.has(name.toLowerCase())
 }

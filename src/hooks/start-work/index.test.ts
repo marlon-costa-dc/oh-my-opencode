@@ -382,10 +382,11 @@ describe("start-work hook", () => {
   })
 
   describe("session agent management", () => {
-    test("should update session agent to Atlas when start-work command is triggered", async () => {
+    test("should update session agent to Atlas when atlas is registered", async () => {
       // given
+      sessionState.setRegisteredAgents(["sisyphus", "atlas", "oracle"])
       const updateSpy = spyOn(sessionState, "updateSessionAgent")
-      
+
       const hook = createStartWorkHook(createMockPluginInput())
       const output = {
         parts: [{ type: "text", text: "<session-context></session-context>" }],
@@ -399,6 +400,27 @@ describe("start-work hook", () => {
 
       // then
       expect(updateSpy).toHaveBeenCalledWith("ses-prometheus-to-sisyphus", "atlas")
+      updateSpy.mockRestore()
+    })
+
+    test("should fall back to sisyphus when atlas is not registered", async () => {
+      // given - atlas is NOT in the registered agents
+      sessionState.setRegisteredAgents(["sisyphus", "oracle"])
+      const updateSpy = spyOn(sessionState, "updateSessionAgent")
+
+      const hook = createStartWorkHook(createMockPluginInput())
+      const output = {
+        parts: [{ type: "text", text: "<session-context></session-context>" }],
+      }
+
+      // when
+      await hook["chat.message"](
+        { sessionID: "ses-no-atlas" },
+        output
+      )
+
+      // then - should fall back to sisyphus
+      expect(updateSpy).toHaveBeenCalledWith("ses-no-atlas", "sisyphus")
       updateSpy.mockRestore()
     })
   })
