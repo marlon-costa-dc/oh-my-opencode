@@ -33,9 +33,16 @@
           "librarian",
           "explore",
           "multimodal-looker",
+<<<<<<< HEAD
           "metis",
           "momus",
           "atlas"
+=======
+          "Metis (Plan Consultant)",
+          "Momus (Plan Reviewer)",
+          "orchestrator-sisyphus",
+          "Walle-Researcher"
+>>>>>>> ruslan-kurchenko/personal
         ]
       }
     },
@@ -48,7 +55,8 @@
           "agent-browser",
           "dev-browser",
           "frontend-ui-ux",
-          "git-master"
+          "git-master",
+          "eskil-core"
         ]
       }
     },
@@ -1765,6 +1773,129 @@
           },
           "additionalProperties": false
         },
+        "Momus (Plan Reviewer)": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "top_p": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "prompt_append": {
+              "type": "string"
+            },
+            "tools": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "disable": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "subagent",
+                "primary",
+                "all"
+              ]
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "permission": {
+              "type": "object",
+              "properties": {
+                "edit": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "bash": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "ask",
+                        "allow",
+                        "deny"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "enum": [
+                          "ask",
+                          "allow",
+                          "deny"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "webfetch": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "doom_loop": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "external_directory": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "oracle": {
           "type": "object",
           "properties": {
@@ -2490,18 +2621,27 @@
               },
               "additionalProperties": {}
             }
+<<<<<<< HEAD
           },
           "additionalProperties": false
         },
         "atlas": {
+=======
+          }
+        },
+        "orchestrator-sisyphus": {
+>>>>>>> ruslan-kurchenko/personal
           "type": "object",
           "properties": {
             "model": {
               "type": "string"
             },
+<<<<<<< HEAD
             "variant": {
               "type": "string"
             },
+=======
+>>>>>>> ruslan-kurchenko/personal
             "category": {
               "type": "string"
             },
@@ -2599,7 +2739,126 @@
                     "deny"
                   ]
                 },
+<<<<<<< HEAD
                 "task": {
+=======
+                "doom_loop": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "external_directory": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "Walle-Researcher": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "top_p": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "prompt_append": {
+              "type": "string"
+            },
+            "tools": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "disable": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "subagent",
+                "primary",
+                "all"
+              ]
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "permission": {
+              "type": "object",
+              "properties": {
+                "edit": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "bash": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "ask",
+                        "allow",
+                        "deny"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "enum": [
+                          "ask",
+                          "allow",
+                          "deny"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "webfetch": {
+>>>>>>> ruslan-kurchenko/personal
                   "type": "string",
                   "enum": [
                     "ask",
@@ -2623,6 +2882,7 @@
                     "deny"
                   ]
                 }
+<<<<<<< HEAD
               },
               "additionalProperties": false
             },
@@ -2674,6 +2934,11 @@
             }
           },
           "additionalProperties": false
+=======
+              }
+            }
+          }
+>>>>>>> ruslan-kurchenko/personal
         }
       },
       "additionalProperties": false
@@ -2751,6 +3016,12 @@
             },
             "additionalProperties": {
               "type": "boolean"
+            }
+          },
+          "auto_skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           },
           "prompt_append": {
