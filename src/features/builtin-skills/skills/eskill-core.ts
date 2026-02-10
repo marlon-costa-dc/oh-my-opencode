@@ -1,4 +1,4 @@
-import type { BuiltinSkill } from "../../types"
+import type { BuiltinSkill } from "../types"
 
 export const eskilCoreSkill: BuiltinSkill = {
   name: "eskil-core",
