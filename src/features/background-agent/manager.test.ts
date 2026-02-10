@@ -2648,6 +2648,52 @@ describe("BackgroundManager.completionTimers - Memory Leak Fix", () => {
     manager.shutdown()
   })
 
+  test("should cascade cancel all descendant tasks when parent session is deleted", () => {
+    // given
+    const manager = createBackgroundManager()
+    const parentTask: BackgroundTask = {
+      id: "task-parent",
+      sessionID: "ses-parent-task",
+      parentSessionID: "ses-main",
+      parentMessageID: "msg-1",
+      description: "Parent task",
+      prompt: "test",
+      agent: "explore",
+      status: "running",
+      startedAt: new Date(),
+    }
+    const childTask: BackgroundTask = {
+      id: "task-child",
+      sessionID: "ses-child-task",
+      parentSessionID: "ses-parent-task",
+      parentMessageID: "msg-2",
+      description: "Child task",
+      prompt: "test",
+      agent: "explore",
+      status: "running",
+      startedAt: new Date(),
+    }
+    getTaskMap(manager).set(parentTask.id, parentTask)
+    getTaskMap(manager).set(childTask.id, childTask)
+
+    // when
+    manager.handleEvent({
+      type: "session.deleted",
+      properties: {
+        info: { id: "ses-main" },
+      },
+    })
+
+    // then
+    const parentAfter = getTaskMap(manager).get(parentTask.id)
+    const childAfter = getTaskMap(manager).get(childTask.id)
+
+    expect(parentAfter).toBeUndefined()
+    expect(childAfter).toBeUndefined()
+
+    manager.shutdown()
+  })
+
   test("should not leak timers across multiple shutdown calls", () => {
     // given
     const manager = createBackgroundManager()

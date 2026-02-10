@@ -795,72 +795,28 @@ export class BackgroundManager {
       if (!info || typeof info.id !== "string") return
       const sessionID = info.id
 
-      // Cancel direct task
       const task = this.findBySession(sessionID)
-      if (task) {
-        if (task.status === "running") {
-          task.status = "cancelled"
-          task.completedAt = new Date()
-          task.error = "Session deleted"
-        }
+      if (!task) return
 
-        if (task.concurrencyKey) {
-          this.concurrencyManager.release(task.concurrencyKey)
-          task.concurrencyKey = undefined
-        }
-        
-        const existingTimer = this.completionTimers.get(task.id)
-        if (existingTimer) {
-          clearTimeout(existingTimer)
-          this.completionTimers.delete(task.id)
-        }
-
-        // Also check idle timers
-        // (Assuming idleDeferralTimers is defined in class, if not I skip)
-        // I saw idleDeferralTimers in diff, so I should include it.
-        // Wait, I didn't see idleDeferralTimers in the `read` output I just got (it was truncated).
-        // I will assume it exists if I see it in `this` or skip it to be safe.
-        // I'll stick to what I saw in `manager.ours` read output for safety, BUT I must add cascade.
-        
-        this.cleanupPendingByParent(task)
-        this.tasks.delete(task.id)
-        this.clearNotificationsForTask(task.id)
-        subagentSessions.delete(sessionID)
+      if (task.status === "running") {
+        task.status = "cancelled"
+        task.completedAt = new Date()
+        task.error = "Session deleted"
       }
 
-      // Cascade cancel descendants
-      const descendants = this.getAllDescendantTasks(sessionID)
-      for (const descendant of descendants) {
-        if (descendant.status === "running" || descendant.status === "pending") {
-          descendant.status = "cancelled"
-          descendant.completedAt = new Date()
-          descendant.error = "Parent session deleted"
-
-          if (descendant.concurrencyKey) {
-            this.concurrencyManager.release(descendant.concurrencyKey)
-            descendant.concurrencyKey = undefined
-          }
-
-          const descendantTimer = this.completionTimers.get(descendant.id)
-          if (descendantTimer) {
-            clearTimeout(descendantTimer)
-            this.completionTimers.delete(descendant.id)
-          }
-
-          this.cleanupPendingByParent(descendant)
-          this.tasks.delete(descendant.id)
-          this.clearNotificationsForTask(descendant.id)
-
-          if (descendant.sessionID) {
-            subagentSessions.delete(descendant.sessionID)
-          }
-
-          log(`[background-manager] Cascade cancelled descendant task`, {
-            taskId: descendant.id,
-            parentSessionID: sessionID,
-          })
-        }
+       if (task.concurrencyKey) {
+         this.concurrencyManager.release(task.concurrencyKey)
+         task.concurrencyKey = undefined
+       }
+      const existingTimer = this.completionTimers.get(task.id)
+      if (existingTimer) {
+        clearTimeout(existingTimer)
+        this.completionTimers.delete(task.id)
       }
+      this.cleanupPendingByParent(task)
+      this.tasks.delete(task.id)
+      this.clearNotificationsForTask(task.id)
+      subagentSessions.delete(sessionID)
     }
   }
 
