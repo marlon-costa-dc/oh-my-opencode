@@ -81,6 +81,20 @@ When both `oh-my-opencode.jsonc` and `oh-my-opencode.json` files exist, `.jsonc`
 }
 ```
 
+## Root Keys (Schema-Accurate)
+
+Top-level keys are validated by `src/config/schema/oh-my-opencode-config.ts`.
+
+| Key | Type | Notes |
+| --- | --- | --- |
+| `new_task_system_enabled` | boolean | Enables the new task system integration. |
+| `default_run_agent` | string | Default agent for `oh-my-opencode run` (env: `OPENCODE_DEFAULT_AGENT`). |
+| `disabled_tools` | string[] | Disables tools by name (for example `todowrite`, `todoread`). |
+| `auto_update` | boolean | Global auto-update toggle. |
+| `_migrations` | string[] | Internal migration history; usually managed automatically. |
+
+In addition to those keys, `agents`, `categories`, `skills`, `runtime_fallback`, `background_task`, `experimental`, `tmux`, `websearch`, `browser_automation_engine`, and other sections below are also top-level schema keys.
+
 ## Google Auth
 
 **Recommended**: For Google Gemini authentication, install the [`opencode-antigravity-auth`](https://github.com/NoeFabris/opencode-antigravity-auth) plugin (`@latest`). It provides multi-account load balancing, variant-based thinking levels, dual quota system (Antigravity + Gemini CLI), and active maintenance. See [Installation > Google Gemini](docs/guide/installation.md#google-gemini-antigravity-oauth).
@@ -163,7 +177,7 @@ Override built-in agent settings:
 }
 ```
 
-Each agent supports: `model`, `fallback_models`, `temperature`, `top_p`, `prompt`, `prompt_append`, `tools`, `disable`, `description`, `mode`, `color`, `permission`, `category`, `variant`, `maxTokens`, `thinking`, `reasoningEffort`, `textVerbosity`, `providerOptions`.
+Each agent supports: `model`, `fallback_models`, `temperature`, `top_p`, `prompt`, `prompt_append`, `tools`, `disable`, `description`, `mode`, `color`, `permission`, `category`, `skills`, `variant`, `maxTokens`, `thinking`, `reasoningEffort`, `textVerbosity`, `providerOptions`.
 
 ### Additional Agent Options
 
@@ -171,6 +185,7 @@ Each agent supports: `model`, `fallback_models`, `temperature`, `top_p`, `prompt
 | ------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
 | `fallback_models`   | string/array   | Fallback models for runtime switching on API errors. Single string or array of model strings.  |
 | `category`          | string         | Category name to inherit model and other settings from category defaults                        |
+| `skills`            | string[]       | Skill names to inject into the agent prompt                                                     |
 | `variant`           | string         | Model variant (e.g., `max`, `high`, `medium`, `low`, `xhigh`)                                   |
 | `maxTokens`         | number         | Maximum tokens for response. Passed directly to OpenCode SDK.                                   |
 | `thinking`          | object         | Extended thinking configuration for Anthropic models. See [Thinking Options](#thinking-options) below. |
@@ -246,14 +261,19 @@ Or disable via `disabled_agents` in `~/.config/opencode/oh-my-opencode.json` or 
 }
 ```
 
-Available agents: `sisyphus`, `prometheus`, `oracle`, `librarian`, `explore`, `multimodal-looker`, `metis`, `momus`, `atlas`
+Available built-in agent names: `sisyphus`, `hephaestus`, `prometheus`, `oracle`, `librarian`, `explore`, `multimodal-looker`, `metis`, `momus`, `atlas`, `devils-advocate`, `walle-researcher`
+
+Agent overrides (`agents`) additionally support: `build`, `plan`, `sisyphus-junior`, `OpenCode-Builder`.
 
 ## Built-in Skills
 
 Oh My OpenCode includes built-in skills that provide additional capabilities:
 
 - **playwright** (default) / **agent-browser**: Browser automation for web scraping, testing, screenshots, and browser interactions. See [Browser Automation](#browser-automation) for switching between providers.
+- **dev-browser**: Persistent browser workflow helper for navigation, form filling, screenshots, and automation tasks.
+- **frontend-ui-ux**: Specialized UI/UX skill for frontend design and interaction quality.
 - **git-master**: Git expert for atomic commits, rebase/squash, and history search (blame, bisect, log -S). STRONGLY RECOMMENDED: Use with `task(category='quick', load_skills=['git-master'], ...)` to save context.
+- **eskil-core**: Foundational architecture and debugging method skill.
 
 Disable built-in skills via `disabled_skills` in `~/.config/opencode/oh-my-opencode.json` or `.opencode/oh-my-opencode.json`:
 
@@ -263,7 +283,9 @@ Disable built-in skills via `disabled_skills` in `~/.config/opencode/oh-my-openc
 }
 ```
 
-Available built-in skills: `playwright`, `agent-browser`, `git-master`
+Built-in skills exposed by schema-aware toggles (`disabled_skills`): `playwright`, `agent-browser`, `dev-browser`, `frontend-ui-ux`, `git-master`
+
+Additional bundled skill: `eskil-core` (available in built-in skill loader; not currently part of `BuiltinSkillNameSchema`).
 
 ## Skills Configuration
 
@@ -887,12 +909,11 @@ Each category supports: `model`, `fallback_models`, `temperature`, `top_p`, `max
 
 ### Additional Category Options
 
-<<<<<<< HEAD
 | Option              | Type         | Default | Description                                                                                         |
 | ------------------- | ------------ | ------- | --------------------------------------------------------------------------------------------------- |
 | `fallback_models`   | string/array | -       | Fallback models for runtime switching on API errors. Single string or array of model strings.      |
 | `description`       | string       | -       | Human-readable description of the category's purpose. Shown in task prompt.                         |
-| `is_unstable_agent` | boolean      | `false` | Mark agent as unstable - forces background mode for monitoring. Auto-enabled for gemini models.    |
+| `is_unstable_agent` | boolean      | `false` | Mark agent as unstable - forces background mode for monitoring. Auto-enabled for gemini/minimax models. |
 
 ## Runtime Fallback
 
@@ -1084,7 +1105,7 @@ Disable specific built-in hooks via `disabled_hooks` in `~/.config/opencode/oh-m
 }
 ```
 
-Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `anthropic-context-window-limit-recovery`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `compaction-context-injector`, `thinking-block-validator`, `claude-code-hooks`, `ralph-loop`, `preemptive-compaction`, `auto-slash-command`, `sisyphus-junior-notepad`, `start-work`, `runtime-fallback`
+Available hooks: `todo-continuation-enforcer`, `context-window-monitor`, `session-recovery`, `session-notification`, `comment-checker`, `grep-output-truncator`, `tool-output-truncator`, `question-label-truncator`, `directory-agents-injector`, `directory-readme-injector`, `empty-task-response-detector`, `think-mode`, `subagent-question-blocker`, `anthropic-context-window-limit-recovery`, `preemptive-compaction`, `rules-injector`, `background-notification`, `auto-update-checker`, `startup-toast`, `keyword-detector`, `agent-usage-reminder`, `non-interactive-env`, `interactive-bash-session`, `thinking-block-validator`, `ralph-loop`, `review-loop`, `boulder-loop`, `boulder-question-auto-answer`, `category-skill-reminder`, `compaction-context-injector`, `compaction-todo-preserver`, `claude-code-hooks`, `auto-slash-command`, `edit-error-recovery`, `delegate-task-retry`, `prometheus-md-only`, `sisyphus-junior-notepad`, `start-work`, `atlas`, `unstable-agent-babysitter`, `task-reminder`, `task-resume-info`, `stop-continuation-guard`, `tasks-todowrite-disabler`, `write-existing-file-guard`, `anthropic-effort`, `loop-detector`, `definition-gates`, `runtime-fallback`
 
 **Note on `directory-agents-injector`**: This hook is **automatically disabled** when running on OpenCode 1.1.37+ because OpenCode now has native support for dynamically resolving AGENTS.md files from subdirectories (PR #10678). This prevents duplicate AGENTS.md injection. For older OpenCode versions, the hook remains active to provide the same functionality.
 

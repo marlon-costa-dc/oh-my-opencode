@@ -33,16 +33,11 @@
           "librarian",
           "explore",
           "multimodal-looker",
-<<<<<<< HEAD
           "metis",
           "momus",
-          "atlas"
-=======
-          "Metis (Plan Consultant)",
-          "Momus (Plan Reviewer)",
-          "orchestrator-sisyphus",
-          "Walle-Researcher"
->>>>>>> ruslan-kurchenko/personal
+          "atlas",
+          "devils-advocate",
+          "walle-researcher"
         ]
       }
     },
@@ -55,8 +50,7 @@
           "agent-browser",
           "dev-browser",
           "frontend-ui-ux",
-          "git-master",
-          "eskil-core"
+          "git-master"
         ]
       }
     },
@@ -90,6 +84,9 @@
           "interactive-bash-session",
           "thinking-block-validator",
           "ralph-loop",
+          "review-loop",
+          "boulder-loop",
+          "boulder-question-auto-answer",
           "category-skill-reminder",
           "compaction-context-injector",
           "compaction-todo-preserver",
@@ -107,7 +104,10 @@
           "stop-continuation-guard",
           "tasks-todowrite-disabler",
           "write-existing-file-guard",
-          "anthropic-effort"
+          "anthropic-effort",
+          "loop-detector",
+          "definition-gates",
+          "runtime-fallback"
         ]
       }
     },
@@ -122,6 +122,10 @@
           "cancel-ralph",
           "refactor",
           "start-work",
+          "handoff",
+          "review-loop",
+          "boulder",
+          "cancel-boulder",
           "stop-continuation"
         ]
       }
@@ -140,6 +144,19 @@
           "properties": {
             "model": {
               "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "variant": {
               "type": "string"
@@ -323,6 +340,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -504,6 +534,19 @@
           "properties": {
             "model": {
               "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "variant": {
               "type": "string"
@@ -687,6 +730,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -868,6 +924,19 @@
           "properties": {
             "model": {
               "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "variant": {
               "type": "string"
@@ -1051,6 +1120,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -1232,6 +1314,19 @@
           "properties": {
             "model": {
               "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "variant": {
               "type": "string"
@@ -1415,6 +1510,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -1597,6 +1705,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -1773,134 +1894,24 @@
           },
           "additionalProperties": false
         },
-        "Momus (Plan Reviewer)": {
-          "type": "object",
-          "properties": {
-            "model": {
-              "type": "string"
-            },
-            "category": {
-              "type": "string"
-            },
-            "skills": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "temperature": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 2
-            },
-            "top_p": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            },
-            "prompt": {
-              "type": "string"
-            },
-            "prompt_append": {
-              "type": "string"
-            },
-            "tools": {
-              "type": "object",
-              "propertyNames": {
-                "type": "string"
-              },
-              "additionalProperties": {
-                "type": "boolean"
-              }
-            },
-            "disable": {
-              "type": "boolean"
-            },
-            "description": {
-              "type": "string"
-            },
-            "mode": {
-              "type": "string",
-              "enum": [
-                "subagent",
-                "primary",
-                "all"
-              ]
-            },
-            "color": {
-              "type": "string",
-              "pattern": "^#[0-9A-Fa-f]{6}$"
-            },
-            "permission": {
-              "type": "object",
-              "properties": {
-                "edit": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                },
-                "bash": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "ask",
-                        "allow",
-                        "deny"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "propertyNames": {
-                        "type": "string"
-                      },
-                      "additionalProperties": {
-                        "type": "string",
-                        "enum": [
-                          "ask",
-                          "allow",
-                          "deny"
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "webfetch": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                },
-                "doom_loop": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                },
-                "external_directory": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                }
-              }
-            }
-          }
-        },
         "oracle": {
           "type": "object",
           "properties": {
             "model": {
               "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "variant": {
               "type": "string"
@@ -2084,6 +2095,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -2265,6 +2289,19 @@
           "properties": {
             "model": {
               "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
             },
             "variant": {
               "type": "string"
@@ -2448,6 +2485,19 @@
             "model": {
               "type": "string"
             },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
@@ -2621,27 +2671,421 @@
               },
               "additionalProperties": {}
             }
-<<<<<<< HEAD
+          },
+          "additionalProperties": false
+        },
+        "devils-advocate": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "variant": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "top_p": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "prompt_append": {
+              "type": "string"
+            },
+            "tools": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "disable": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "subagent",
+                "primary",
+                "all"
+              ]
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "permission": {
+              "type": "object",
+              "properties": {
+                "edit": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "bash": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "ask",
+                        "allow",
+                        "deny"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "enum": [
+                          "ask",
+                          "allow",
+                          "deny"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "webfetch": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "task": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "doom_loop": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "external_directory": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxTokens": {
+              "type": "number"
+            },
+            "thinking": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "enabled",
+                    "disabled"
+                  ]
+                },
+                "budgetTokens": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "reasoningEffort": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "xhigh"
+              ]
+            },
+            "textVerbosity": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "providerOptions": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "additionalProperties": false
+        },
+        "walle-researcher": {
+          "type": "object",
+          "properties": {
+            "model": {
+              "type": "string"
+            },
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "variant": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "temperature": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 2
+            },
+            "top_p": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "prompt_append": {
+              "type": "string"
+            },
+            "tools": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            "disable": {
+              "type": "boolean"
+            },
+            "description": {
+              "type": "string"
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "subagent",
+                "primary",
+                "all"
+              ]
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$"
+            },
+            "permission": {
+              "type": "object",
+              "properties": {
+                "edit": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "bash": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "ask",
+                        "allow",
+                        "deny"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string",
+                        "enum": [
+                          "ask",
+                          "allow",
+                          "deny"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "webfetch": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "task": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "doom_loop": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                },
+                "external_directory": {
+                  "type": "string",
+                  "enum": [
+                    "ask",
+                    "allow",
+                    "deny"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "maxTokens": {
+              "type": "number"
+            },
+            "thinking": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "enabled",
+                    "disabled"
+                  ]
+                },
+                "budgetTokens": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "reasoningEffort": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "xhigh"
+              ]
+            },
+            "textVerbosity": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            },
+            "providerOptions": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
           },
           "additionalProperties": false
         },
         "atlas": {
-=======
-          }
-        },
-        "orchestrator-sisyphus": {
->>>>>>> ruslan-kurchenko/personal
           "type": "object",
           "properties": {
             "model": {
               "type": "string"
             },
-<<<<<<< HEAD
+            "fallback_models": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
             "variant": {
               "type": "string"
             },
-=======
->>>>>>> ruslan-kurchenko/personal
             "category": {
               "type": "string"
             },
@@ -2739,126 +3183,7 @@
                     "deny"
                   ]
                 },
-<<<<<<< HEAD
                 "task": {
-=======
-                "doom_loop": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                },
-                "external_directory": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "Walle-Researcher": {
-          "type": "object",
-          "properties": {
-            "model": {
-              "type": "string"
-            },
-            "category": {
-              "type": "string"
-            },
-            "skills": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "temperature": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 2
-            },
-            "top_p": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
-            },
-            "prompt": {
-              "type": "string"
-            },
-            "prompt_append": {
-              "type": "string"
-            },
-            "tools": {
-              "type": "object",
-              "propertyNames": {
-                "type": "string"
-              },
-              "additionalProperties": {
-                "type": "boolean"
-              }
-            },
-            "disable": {
-              "type": "boolean"
-            },
-            "description": {
-              "type": "string"
-            },
-            "mode": {
-              "type": "string",
-              "enum": [
-                "subagent",
-                "primary",
-                "all"
-              ]
-            },
-            "color": {
-              "type": "string",
-              "pattern": "^#[0-9A-Fa-f]{6}$"
-            },
-            "permission": {
-              "type": "object",
-              "properties": {
-                "edit": {
-                  "type": "string",
-                  "enum": [
-                    "ask",
-                    "allow",
-                    "deny"
-                  ]
-                },
-                "bash": {
-                  "anyOf": [
-                    {
-                      "type": "string",
-                      "enum": [
-                        "ask",
-                        "allow",
-                        "deny"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "propertyNames": {
-                        "type": "string"
-                      },
-                      "additionalProperties": {
-                        "type": "string",
-                        "enum": [
-                          "ask",
-                          "allow",
-                          "deny"
-                        ]
-                      }
-                    }
-                  ]
-                },
-                "webfetch": {
->>>>>>> ruslan-kurchenko/personal
                   "type": "string",
                   "enum": [
                     "ask",
@@ -2882,7 +3207,6 @@
                     "deny"
                   ]
                 }
-<<<<<<< HEAD
               },
               "additionalProperties": false
             },
@@ -2934,11 +3258,6 @@
             }
           },
           "additionalProperties": false
-=======
-              }
-            }
-          }
->>>>>>> ruslan-kurchenko/personal
         }
       },
       "additionalProperties": false
@@ -2956,6 +3275,19 @@
           },
           "model": {
             "type": "string"
+          },
+          "fallback_models": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
           },
           "variant": {
             "type": "string"
@@ -3018,12 +3350,6 @@
               "type": "boolean"
             }
           },
-          "auto_skills": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "prompt_append": {
             "type": "string"
           },
@@ -3081,6 +3407,12 @@
         },
         "replace_plan": {
           "type": "boolean"
+        },
+        "archive_completed_plans": {
+          "type": "boolean"
+        },
+        "archive_path": {
+          "type": "string"
         }
       },
       "additionalProperties": false
@@ -3378,11 +3710,64 @@
         },
         "state_dir": {
           "type": "string"
+        },
+        "default_strategy": {
+          "type": "string",
+          "enum": [
+            "reset",
+            "continue"
+          ]
         }
       },
       "required": [
         "enabled",
         "default_max_iterations"
+      ],
+      "additionalProperties": false
+    },
+    "review_loop": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "type": "boolean"
+        },
+        "default_max_iterations": {
+          "default": 10,
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "state_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "default_max_iterations"
+      ],
+      "additionalProperties": false
+    },
+    "boulder_loop": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "default_hours": {
+          "default": 4,
+          "type": "number",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "state_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "default_hours"
       ],
       "additionalProperties": false
     },
@@ -3418,6 +3803,46 @@
           "minimum": 60000
         }
       },
+      "additionalProperties": false
+    },
+    "runtime_fallback": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "type": "boolean"
+        },
+        "retry_on_errors": {
+          "default": [
+            429,
+            503,
+            529
+          ],
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "max_fallback_attempts": {
+          "default": 3,
+          "type": "number"
+        },
+        "cooldown_seconds": {
+          "default": 60,
+          "type": "number"
+        },
+        "notify_on_fallback": {
+          "default": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "retry_on_errors",
+        "max_fallback_attempts",
+        "cooldown_seconds",
+        "notify_on_fallback"
+      ],
       "additionalProperties": false
     },
     "notification": {
