@@ -11,7 +11,6 @@ import {
   createBackgroundTools,
   createCallOmoAgent,
   createLookAt,
-  createSkillTool,
   createSkillMcpTool,
   createSlashcommandTool,
   createGrepTools,
@@ -87,14 +86,6 @@ export function createToolRegistry(args: {
 
   const getSessionIDForMcp = (): string => getMainSessionID() || ""
 
-  const skillTool = createSkillTool({
-    skills: skillContext.mergedSkills,
-    mcpManager: managers.skillMcpManager,
-    getSessionID: getSessionIDForMcp,
-    gitMasterConfig: pluginConfig.git_master,
-    disabledSkills: skillContext.disabledSkills,
-  })
-
   const skillMcpTool = createSkillMcpTool({
     manager: managers.skillMcpManager,
     getLoadedSkills: () => skillContext.mergedSkills,
@@ -105,6 +96,9 @@ export function createToolRegistry(args: {
   const slashcommandTool = createSlashcommandTool({
     commands,
     skills: skillContext.mergedSkills,
+    mcpManager: managers.skillMcpManager,
+    getSessionID: getSessionIDForMcp,
+    gitMasterConfig: pluginConfig.git_master,
   })
 
   const taskSystemEnabled = pluginConfig.experimental?.task_system ?? false
@@ -127,7 +121,6 @@ export function createToolRegistry(args: {
     call_omo_agent: callOmoAgent,
     ...(lookAt ? { look_at: lookAt } : {}),
     task: delegateTask,
-    skill: skillTool,
     skill_mcp: skillMcpTool,
     slashcommand: slashcommandTool,
     interactive_bash,
