@@ -2,7 +2,8 @@ import * as p from "@clack/prompts"
 import color from "picocolors"
 import type { AgentOverrideConfig } from "../../config/schema"
 import type { ConfigEditorState, AgentName, BashPermissionValue, BashCommand } from "./types"
-import { AGENT_NAMES, AVAILABLE_MODELS, BASH_COMMANDS } from "./types"
+import { AGENT_NAMES, BASH_COMMANDS } from "./types"
+import { selectModelWithCacheLoader } from "./ui-utils"
 
 type ExtendedAgentConfig = AgentOverrideConfig & { fallback_model?: string }
 
@@ -76,15 +77,10 @@ async function editAgentField(
   }
 
   if (field === "model") {
-    const model = await p.select({
-      message: `Select model for "${agentName}":`,
-      options: [
-        ...AVAILABLE_MODELS.map((m) => ({ value: m, label: m })),
-        { value: "__custom__", label: "Custom model..." },
-        { value: "__clear__", label: "Clear model" },
-      ],
-      initialValue: agent.model,
-    })
+    const model = await selectModelWithCacheLoader(
+      `Select model for "${agentName}":`,
+      agent.model
+    )
 
     if (p.isCancel(model)) return false
 
@@ -99,7 +95,7 @@ async function editAgentField(
       if (p.isCancel(custom)) return false
       finalModel = custom
     } else {
-      finalModel = model
+      finalModel = model as string
     }
 
     if (!state.config.agents) state.config.agents = {}
@@ -150,22 +146,17 @@ async function editAgentField(
   }
 
   if (field === "fallback_model") {
-    const fallback = await p.select({
-      message: `Select fallback model for "${agentName}":`,
-      options: [
-        ...AVAILABLE_MODELS.map((m) => ({ value: m, label: m })),
-        { value: "__custom__", label: "Custom model..." },
-        { value: "__clear__", label: "Clear fallback" },
-      ],
-      initialValue: agent.fallback_model,
-    })
+    const model = await selectModelWithCacheLoader(
+      `Select fallback model for "${agentName}":`,
+      agent.fallback_model
+    )
 
-    if (p.isCancel(fallback)) return false
+    if (p.isCancel(model)) return false
 
     let finalFallback: string | undefined
-    if (fallback === "__clear__") {
+    if (model === "__clear__") {
       finalFallback = undefined
-    } else if (fallback === "__custom__") {
+    } else if (model === "__custom__") {
       const custom = await p.text({
         message: "Enter custom fallback model:",
         initialValue: agent.fallback_model ?? "",
@@ -173,7 +164,7 @@ async function editAgentField(
       if (p.isCancel(custom)) return false
       finalFallback = custom
     } else {
-      finalFallback = fallback
+      finalFallback = model as string
     }
 
     if (!state.config.agents) state.config.agents = {}
