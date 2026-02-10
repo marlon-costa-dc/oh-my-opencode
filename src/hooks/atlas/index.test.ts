@@ -9,19 +9,17 @@ import {
   readBoulderState,
 } from "../../features/boulder-state"
 import type { BoulderState } from "../../features/boulder-state"
+import {
+  _resetForTesting,
+  setMainSession,
+  subagentSessions,
+} from "../../features/claude-code-session-state"
 
 const TEST_STORAGE_ROOT = join(tmpdir(), `atlas-message-storage-${randomUUID()}`)
 const TEST_MESSAGE_STORAGE = join(TEST_STORAGE_ROOT, "message")
 const TEST_PART_STORAGE = join(TEST_STORAGE_ROOT, "part")
-
-mock.module("../../features/hook-message-injector/constants", () => ({
-  OPENCODE_STORAGE: TEST_STORAGE_ROOT,
-  MESSAGE_STORAGE: TEST_MESSAGE_STORAGE,
-  PART_STORAGE: TEST_PART_STORAGE,
-}))
-
-const { createAtlasHook } = await import("./index")
-const { MESSAGE_STORAGE } = await import("../../features/hook-message-injector")
+import { createAtlasHook } from "./index"
+import { MESSAGE_STORAGE } from "../../features/hook-message-injector"
 
 describe("atlas hook", () => {
   let TEST_DIR: string
@@ -77,7 +75,7 @@ describe("atlas hook", () => {
     if (existsSync(TEST_DIR)) {
       rmSync(TEST_DIR, { recursive: true, force: true })
     }
-    rmSync(TEST_STORAGE_ROOT, { recursive: true, force: true })
+    _resetForTesting()
   })
 
   describe("tool.execute.after handler", () => {
@@ -630,13 +628,11 @@ describe("atlas hook", () => {
       await Promise.resolve()
     }
 
-     beforeEach(() => {
-       mock.module("../../features/claude-code-session-state", () => ({
-         getMainSessionID: () => MAIN_SESSION_ID,
-         subagentSessions: new Set<string>(),
-       }))
-       setupMessageStorage(MAIN_SESSION_ID, "atlas")
-     })
+      beforeEach(() => {
+        setMainSession(MAIN_SESSION_ID)
+        subagentSessions.clear()
+        setupMessageStorage(MAIN_SESSION_ID, "atlas")
+      })
 
     afterEach(() => {
       cleanupMessageStorage(MAIN_SESSION_ID)

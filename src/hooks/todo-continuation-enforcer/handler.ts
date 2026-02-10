@@ -7,6 +7,7 @@ import { DEFAULT_SKIP_AGENTS, HOOK_NAME } from "./constants"
 import type { SessionStateStore } from "./session-state"
 import { handleSessionIdle } from "./idle-event"
 import { handleNonIdleEvent } from "./non-idle-events"
+import type { TodoContinuationConfig } from "./types"
 
 export function createTodoContinuationHandler(args: {
   ctx: PluginInput
@@ -16,6 +17,7 @@ export function createTodoContinuationHandler(args: {
   isContinuationStopped?: (sessionID: string) => boolean
   directory?: string
   ralphLoopStateDir?: string
+  config?: TodoContinuationConfig
 }): (input: { event: { type: string; properties?: unknown } }) => Promise<void> {
   const {
     ctx,
@@ -25,6 +27,7 @@ export function createTodoContinuationHandler(args: {
     isContinuationStopped,
     directory,
     ralphLoopStateDir,
+    config,
   } = args
 
   return async ({ event }: { event: { type: string; properties?: unknown } }): Promise<void> => {
@@ -58,6 +61,7 @@ export function createTodoContinuationHandler(args: {
         isContinuationStopped,
         directory,
         ralphLoopStateDir,
+        config,
       })
       return
     }

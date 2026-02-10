@@ -31,7 +31,7 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     // #then - fallbackChain has claude-opus-4-6 first, glm-4.7-free last
     expect(sisyphus).toBeDefined()
     expect(sisyphus.fallbackChain).toBeArray()
-    expect(sisyphus.fallbackChain).toHaveLength(5)
+    expect(sisyphus.fallbackChain).toHaveLength(7)
     expect(sisyphus.requiresAnyModel).toBe(true)
 
     const primary = sisyphus.fallbackChain[0]
@@ -39,7 +39,7 @@ describe("AGENT_MODEL_REQUIREMENTS", () => {
     expect(primary.model).toBe("claude-opus-4-6")
     expect(primary.variant).toBe("max")
 
-    const last = sisyphus.fallbackChain[4]
+    const last = sisyphus.fallbackChain[6]
     expect(last.providers[0]).toBe("opencode")
     expect(last.model).toBe("glm-4.7-free")
   })

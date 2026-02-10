@@ -60,8 +60,8 @@ describe("preemptive-compaction", () => {
     expect(summarize).toHaveBeenCalled()
   })
 
-  test("does not trigger summarize for opus 4.6 at 180K (well under 1M limit)", async () => {
-    //#given - opus 4.6 at 180K (18% of 1M limit)
+  test("does not trigger summarize for opus 4.6 at 180K when contextWindowLimit is 1M", async () => {
+    //#given - opus 4.6 at 180K (18% of explicit 1M limit)
     const messages = mock(() =>
       Promise.resolve({
         data: [
@@ -70,6 +70,7 @@ describe("preemptive-compaction", () => {
               role: "assistant",
               providerID: "anthropic",
               modelID: "claude-opus-4-6",
+              contextWindowLimit: 1_000_000,
               tokens: {
                 input: 180000,
                 output: 0,
@@ -95,8 +96,8 @@ describe("preemptive-compaction", () => {
     expect(summarize).not.toHaveBeenCalled()
   })
 
-  test("triggers summarize for opus 4.6 when usage exceeds 78% of 1M", async () => {
-    //#given - opus 4.6 at 800K (80% of 1M limit)
+  test("triggers summarize for opus 4.6 when usage exceeds 78% of explicit 1M limit", async () => {
+    //#given - opus 4.6 at 800K (80% of explicit 1M limit)
     const messages = mock(() =>
       Promise.resolve({
         data: [
@@ -105,6 +106,7 @@ describe("preemptive-compaction", () => {
               role: "assistant",
               providerID: "anthropic",
               modelID: "claude-opus-4-6",
+              contextWindowLimit: 1_000_000,
               tokens: {
                 input: 800000,
                 output: 0,

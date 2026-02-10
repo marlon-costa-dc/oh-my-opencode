@@ -19,6 +19,7 @@ export function createTodoContinuationEnforcer(
     isContinuationStopped,
     directory,
     ralphLoopStateDir,
+    config,
   } = options
 
   const sessionStateStore = createSessionStateStore()
@@ -46,6 +47,7 @@ export function createTodoContinuationEnforcer(
     isContinuationStopped,
     directory,
     ralphLoopStateDir,
+    config,
   })
 
   const cancelAllCountdowns = (): void => {

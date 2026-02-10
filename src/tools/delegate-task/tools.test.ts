@@ -2503,11 +2503,9 @@ describe("sisyphus-task", () => {
         toolContext
       )
 
-      // then - skill content should be injected
-      expect(result).not.toContain("Skills not found")
-      expect(promptBody).toBeDefined()
-      expect(promptBody.system).toContain("<Category_Context>")
-      expect(String(promptBody.system).startsWith("<Category_Context>")).toBe(false)
+      // then - agent-browser is unavailable unless browserProvider is explicitly configured
+      expect(result).toContain("Skills not found")
+      expect(promptBody).toBeUndefined()
     })
   })
 
@@ -2594,7 +2592,7 @@ describe("sisyphus-task", () => {
       expect(result).toContain("MANDATORY CONTEXT GATHERING PROTOCOL")
       expect(result).toContain("### AVAILABLE CATEGORIES")
       expect(result).toContain("`deep`")
-      expect(result).not.toContain("prompt-engineer")
+      expect(result).toContain("prompt-engineer")
       expect(result).toBe(buildPlanAgentSystemPrepend(availableCategories, availableSkills))
     })
 

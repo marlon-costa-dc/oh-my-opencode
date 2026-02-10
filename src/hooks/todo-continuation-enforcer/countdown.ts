@@ -8,7 +8,7 @@ import {
   HOOK_NAME,
   TOAST_DURATION_MS,
 } from "./constants"
-import type { ResolvedMessageInfo } from "./types"
+import type { ResolvedMessageInfo, TodoContinuationConfig } from "./types"
 import type { SessionStateStore } from "./session-state"
 import { injectContinuation } from "./continuation-injection"
 
@@ -38,6 +38,7 @@ export function startCountdown(args: {
   backgroundManager?: BackgroundManager
   skipAgents: string[]
   sessionStateStore: SessionStateStore
+  config?: TodoContinuationConfig
 }): void {
   const {
     ctx,
@@ -47,6 +48,7 @@ export function startCountdown(args: {
     backgroundManager,
     skipAgents,
     sessionStateStore,
+    config,
   } = args
 
   const state = sessionStateStore.getState(sessionID)
@@ -72,6 +74,7 @@ export function startCountdown(args: {
       skipAgents,
       resolvedInfo,
       sessionStateStore,
+      config,
     })
   }, COUNTDOWN_SECONDS * 1000)
 

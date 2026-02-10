@@ -1,30 +1,19 @@
 import type { PluginInput } from "@opencode-ai/plugin"
+import type { ModelCacheState } from "../plugin-state"
+import {
+  isAnthropicProvider,
+  resolveContextWindowLimit,
+} from "../shared/context-window-limit-resolver"
+import { formatContextWindowLimitLabel } from "../shared/format-context-limit"
 import { createSystemDirective, SystemDirectiveTypes } from "../shared/system-directive"
 
-const ANTHROPIC_DISPLAY_LIMIT = 1_000_000
-const OPUS_4_6_LIMIT = 1_000_000
-const ANTHROPIC_ACTUAL_LIMIT =
-  process.env.ANTHROPIC_1M_CONTEXT === "true" ||
-  process.env.VERTEX_ANTHROPIC_1M_CONTEXT === "true"
-    ? 1_000_000
-    : 200_000
 const CONTEXT_WARNING_THRESHOLD = 0.70
-
-function isOpus46(modelID: string | undefined): boolean {
-  if (!modelID) return false
-  return modelID.includes("opus-4-6") || modelID.includes("opus-4.6")
-}
-
-const CONTEXT_REMINDER = `${createSystemDirective(SystemDirectiveTypes.CONTEXT_WINDOW_MONITOR)}
-
-You are using Anthropic Claude with 1M context window.
-You have plenty of context remaining - do NOT rush or skip tasks.
-Complete your work thoroughly and methodically.`
 
 interface AssistantMessageInfo {
   role: "assistant"
   providerID: string
   modelID?: string
+  contextWindowLimit?: number
   tokens: {
     input: number
     output: number
@@ -37,7 +26,10 @@ interface MessageWrapper {
   info: { role: string } & Partial<AssistantMessageInfo>
 }
 
-export function createContextWindowMonitorHook(ctx: PluginInput) {
+export function createContextWindowMonitorHook(
+  ctx: PluginInput,
+  modelCacheState?: ModelCacheState,
+) {
   const remindedSessions = new Set<string>()
 
   const toolExecuteAfter = async (
@@ -62,25 +54,34 @@ export function createContextWindowMonitorHook(ctx: PluginInput) {
       if (assistantMessages.length === 0) return
 
       const lastAssistant = assistantMessages[assistantMessages.length - 1]
-      if (lastAssistant.providerID !== "anthropic") return
+      if (!isAnthropicProvider(lastAssistant.providerID)) return
 
       const lastTokens = lastAssistant.tokens
       const totalInputTokens = (lastTokens?.input ?? 0) + (lastTokens?.cache?.read ?? 0)
-
-      const actualLimit = isOpus46(lastAssistant.modelID) ? OPUS_4_6_LIMIT : ANTHROPIC_ACTUAL_LIMIT
+      const actualLimit = resolveContextWindowLimit({
+        contextWindowLimit: lastAssistant.contextWindowLimit,
+        providerID: lastAssistant.providerID,
+        modelID: lastAssistant.modelID,
+        modelContextLimitsCache: modelCacheState?.modelContextLimitsCache,
+      })
       const actualUsagePercentage = totalInputTokens / actualLimit
 
       if (actualUsagePercentage < CONTEXT_WARNING_THRESHOLD) return
 
       remindedSessions.add(sessionID)
 
-      const displayUsagePercentage = totalInputTokens / ANTHROPIC_DISPLAY_LIMIT
+      const displayUsagePercentage = totalInputTokens / actualLimit
       const usedPct = (displayUsagePercentage * 100).toFixed(1)
       const remainingPct = ((1 - displayUsagePercentage) * 100).toFixed(1)
       const usedTokens = totalInputTokens.toLocaleString()
-      const limitTokens = ANTHROPIC_DISPLAY_LIMIT.toLocaleString()
+      const limitTokens = actualLimit.toLocaleString()
+      const reminder = `${createSystemDirective(SystemDirectiveTypes.CONTEXT_WINDOW_MONITOR)}
 
-      output.output += `\n\n${CONTEXT_REMINDER}
+You are using Anthropic Claude with ${formatContextWindowLimitLabel(actualLimit)} context window.
+You have plenty of context remaining - do NOT rush or skip tasks.
+Complete your work thoroughly and methodically.`
+
+      output.output += `\n\n${reminder}
 [Context Status: ${usedPct}% used (${usedTokens}/${limitTokens} tokens), ${remainingPct}% remaining]`
     } catch {
       // Graceful degradation - do not disrupt tool execution

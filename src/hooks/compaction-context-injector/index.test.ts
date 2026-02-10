@@ -1,18 +1,4 @@
-import { describe, expect, it, mock } from "bun:test"
-
-mock.module("../../shared/system-directive", () => ({
-  createSystemDirective: (type: string) => `[DIRECTIVE:${type}]`,
-  SystemDirectiveTypes: {
-    TODO_CONTINUATION: "TODO CONTINUATION",
-    RALPH_LOOP: "RALPH LOOP",
-    BOULDER_CONTINUATION: "BOULDER CONTINUATION",
-    DELEGATION_REQUIRED: "DELEGATION REQUIRED",
-    SINGLE_TASK_ONLY: "SINGLE TASK ONLY",
-    COMPACTION_CONTEXT: "COMPACTION CONTEXT",
-    CONTEXT_WINDOW_MONITOR: "CONTEXT WINDOW MONITOR",
-    PROMETHEUS_READ_ONLY: "PROMETHEUS READ-ONLY",
-  },
-}))
+import { describe, expect, it } from "bun:test"
 
 import { createCompactionContextInjector } from "./index"
 

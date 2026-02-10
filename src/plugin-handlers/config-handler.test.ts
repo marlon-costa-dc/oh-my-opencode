@@ -1,6 +1,6 @@
 /// <reference types="bun-types" />
 
-import { describe, test, expect, spyOn, beforeEach, afterEach } from "bun:test"
+import { describe, test, expect, spyOn, beforeEach, afterEach, mock } from "bun:test"
 import { resolveCategoryConfig, createConfigHandler } from "./config-handler"
 import type { CategoryConfig } from "../config/schema"
 import type { OhMyOpenCodeConfig } from "../config"
@@ -99,6 +99,8 @@ afterEach(() => {
   ;(configDir.getOpenCodeConfigPaths as any)?.mockRestore?.()
   ;(permissionCompat.migrateAgentConfig as any)?.mockRestore?.()
   ;(modelResolver.resolveModelWithFallback as any)?.mockRestore?.()
+  ;(shared.resolveModelPipeline as any)?.mockRestore?.()
+  mock.restore()
 })
 
 describe("Sisyphus-Junior model inheritance", () => {

@@ -1,12 +1,18 @@
 import type { BackgroundManager } from "../../features/background-agent"
 import type { ToolPermission } from "../../features/hook-message-injector"
 
+export interface TodoContinuationConfig {
+  max_injections?: number
+  max_stale_injections?: number
+}
+
 export interface TodoContinuationEnforcerOptions {
   backgroundManager?: BackgroundManager
   skipAgents?: string[]
   isContinuationStopped?: (sessionID: string) => boolean
   directory?: string
   ralphLoopStateDir?: string
+  config?: TodoContinuationConfig
 }
 
 export interface TodoContinuationEnforcer {
@@ -29,6 +35,9 @@ export interface SessionState {
   isRecovering?: boolean
   countdownStartedAt?: number
   abortDetectedAt?: number
+  injectionCount?: number
+  staleInjectionCount?: number
+  lastIncompleteCount?: number
 }
 
 export interface MessageInfo {

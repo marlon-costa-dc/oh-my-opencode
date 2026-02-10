@@ -1,17 +1,7 @@
-const DEFAULT_ACTUAL_LIMIT = 200_000
-const OPUS_4_6_LIMIT = 1_000_000
-
-const ANTHROPIC_ACTUAL_LIMIT =
-  process.env.ANTHROPIC_1M_CONTEXT === "true" ||
-  process.env.VERTEX_ANTHROPIC_1M_CONTEXT === "true"
-    ? 1_000_000
-    : DEFAULT_ACTUAL_LIMIT
-
-/** Claude Opus 4.6 supports 1M context regardless of what models.dev reports for the direct Anthropic provider */
-function isOpus46(modelID: string | undefined): boolean {
-  if (!modelID) return false
-  return modelID.includes("opus-4-6") || modelID.includes("opus-4.6")
-}
+import type { ModelCacheState } from "../plugin-state"
+import {
+  resolveContextWindowLimit,
+} from "../shared/context-window-limit-resolver"
 
 const PREEMPTIVE_COMPACTION_THRESHOLD = 0.78
 
@@ -19,6 +9,7 @@ interface AssistantMessageInfo {
   role: "assistant"
   providerID: string
   modelID?: string
+  contextWindowLimit?: number
   tokens: {
     input: number
     output: number
@@ -44,7 +35,10 @@ type PluginInput = {
   directory: string
 }
 
-export function createPreemptiveCompactionHook(ctx: PluginInput) {
+export function createPreemptiveCompactionHook(
+  ctx: PluginInput,
+  modelCacheState?: ModelCacheState,
+) {
   const compactionInProgress = new Set<string>()
   const compactedSessions = new Set<string>()
 
@@ -59,8 +53,7 @@ export function createPreemptiveCompactionHook(ctx: PluginInput) {
       const response = await ctx.client.session.messages({
         path: { id: sessionID },
       })
-      const payload = response as { data?: MessageWrapper[] } | MessageWrapper[]
-      const messages = Array.isArray(payload) ? payload : (payload.data ?? [])
+      const messages = (Array.isArray(response) ? response : ((response as any).data ?? [])) as MessageWrapper[]
       const assistantMessages = messages
         .filter((m) => m.info.role === "assistant")
         .map((m) => m.info as AssistantMessageInfo)
@@ -68,11 +61,12 @@ export function createPreemptiveCompactionHook(ctx: PluginInput) {
       if (assistantMessages.length === 0) return
 
       const lastAssistant = assistantMessages[assistantMessages.length - 1]
-      const actualLimit = isOpus46(lastAssistant.modelID)
-        ? OPUS_4_6_LIMIT
-        : lastAssistant.providerID === "anthropic"
-          ? ANTHROPIC_ACTUAL_LIMIT
-          : DEFAULT_ACTUAL_LIMIT
+      const actualLimit = resolveContextWindowLimit({
+        contextWindowLimit: lastAssistant.contextWindowLimit,
+        providerID: lastAssistant.providerID,
+        modelID: lastAssistant.modelID,
+        modelContextLimitsCache: modelCacheState?.modelContextLimitsCache,
+      })
 
       const lastTokens = lastAssistant.tokens
       const totalInputTokens = (lastTokens?.input ?? 0) + (lastTokens?.cache?.read ?? 0)

@@ -14,7 +14,11 @@ import {
 } from "./constants"
 import { getMessageDir } from "./message-directory"
 import { getIncompleteCount } from "./todo"
-import type { ResolvedMessageInfo, Todo } from "./types"
+import type {
+  ResolvedMessageInfo,
+  Todo,
+  TodoContinuationConfig,
+} from "./types"
 import type { SessionStateStore } from "./session-state"
 
 function hasWritePermission(tools: Record<string, ToolPermission> | undefined): boolean {
@@ -26,6 +30,30 @@ function hasWritePermission(tools: Record<string, ToolPermission> | undefined): 
   )
 }
 
+function getInjectionLimit(value: number | undefined): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return Number.POSITIVE_INFINITY
+  }
+
+  return value
+}
+
+async function showStoppedToast(
+  ctx: PluginInput,
+  reason: string,
+): Promise<void> {
+  await ctx.client.tui
+    .showToast({
+      body: {
+        title: "Todo Continuation Stopped",
+        message: reason,
+        variant: "warning",
+        duration: 2500,
+      },
+    })
+    .catch(() => {})
+}
+
 export async function injectContinuation(args: {
   ctx: PluginInput
   sessionID: string
@@ -33,6 +61,7 @@ export async function injectContinuation(args: {
   skipAgents?: string[]
   resolvedInfo?: ResolvedMessageInfo
   sessionStateStore: SessionStateStore
+  config?: TodoContinuationConfig
 }): Promise<void> {
   const {
     ctx,
@@ -41,11 +70,29 @@ export async function injectContinuation(args: {
     skipAgents = DEFAULT_SKIP_AGENTS,
     resolvedInfo,
     sessionStateStore,
+    config,
   } = args
 
-  const state = sessionStateStore.getExistingState(sessionID)
-  if (state?.isRecovering) {
+  const state = sessionStateStore.getState(sessionID)
+  if (state.isRecovering) {
     log(`[${HOOK_NAME}] Skipped injection: in recovery`, { sessionID })
+    return
+  }
+
+  const maxInjections = getInjectionLimit(config?.max_injections)
+  const maxStaleInjections = getInjectionLimit(config?.max_stale_injections)
+
+  const currentInjectionCount = state.injectionCount ?? 0
+  if (currentInjectionCount >= maxInjections) {
+    await showStoppedToast(
+      ctx,
+      `Maximum continuation injections reached (${currentInjectionCount}).`,
+    )
+    log(`[${HOOK_NAME}] Skipped injection: max injections reached`, {
+      sessionID,
+      currentInjectionCount,
+      maxInjections,
+    })
     return
   }
 
@@ -70,6 +117,28 @@ export async function injectContinuation(args: {
   const freshIncompleteCount = getIncompleteCount(todos)
   if (freshIncompleteCount === 0) {
     log(`[${HOOK_NAME}] Skipped injection: no incomplete todos`, { sessionID })
+    return
+  }
+
+  const lastIncompleteCount = state.lastIncompleteCount
+  const staleInjectionCount =
+    lastIncompleteCount !== undefined && freshIncompleteCount >= lastIncompleteCount
+      ? (state.staleInjectionCount ?? 0) + 1
+      : 0
+
+  state.staleInjectionCount = staleInjectionCount
+  if (staleInjectionCount >= maxStaleInjections) {
+    await showStoppedToast(
+      ctx,
+      `Stale continuation limit reached (${staleInjectionCount}).`,
+    )
+    log(`[${HOOK_NAME}] Skipped injection: stale limit reached`, {
+      sessionID,
+      staleInjectionCount,
+      maxStaleInjections,
+      freshIncompleteCount,
+      lastIncompleteCount,
+    })
     return
   }
 
@@ -131,6 +200,9 @@ ${todoList}`
       },
       query: { directory: ctx.directory },
     })
+
+    state.injectionCount = currentInjectionCount + 1
+    state.lastIncompleteCount = freshIncompleteCount
 
     log(`[${HOOK_NAME}] Injection successful`, { sessionID })
   } catch (error) {

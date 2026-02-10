@@ -13,7 +13,12 @@ import {
 } from "./constants"
 import { isLastAssistantMessageAborted } from "./abort-detection"
 import { getIncompleteCount } from "./todo"
-import type { MessageInfo, ResolvedMessageInfo, Todo } from "./types"
+import type {
+  MessageInfo,
+  ResolvedMessageInfo,
+  Todo,
+  TodoContinuationConfig,
+} from "./types"
 import type { SessionStateStore } from "./session-state"
 import { startCountdown } from "./countdown"
 
@@ -26,6 +31,7 @@ export async function handleSessionIdle(args: {
   isContinuationStopped?: (sessionID: string) => boolean
   directory?: string
   ralphLoopStateDir?: string
+  config?: TodoContinuationConfig
 }): Promise<void> {
   const {
     ctx,
@@ -36,6 +42,7 @@ export async function handleSessionIdle(args: {
     isContinuationStopped,
     directory,
     ralphLoopStateDir,
+    config,
   } = args
 
   log(`[${HOOK_NAME}] session.idle`, { sessionID })
@@ -167,5 +174,6 @@ export async function handleSessionIdle(args: {
     backgroundManager,
     skipAgents,
     sessionStateStore,
+    config,
   })
 }
