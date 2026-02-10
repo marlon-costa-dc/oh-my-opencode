@@ -8,7 +8,7 @@
 - Sisyphus, Atlas, Prometheus
 
 **Subagents** (use own fallback chains):
-- Hephaestus, Oracle, Librarian, Explore, Multimodal-Looker, Metis, Momus, Sisyphus-Junior
+- Hephaestus, Oracle, Librarian, Explore, Multimodal-Looker, Metis, Momus, Sisyphus-Junior, Devils-Advocate
 
 ## STRUCTURE
 ```
@@ -36,6 +36,7 @@ agents/
 ├── librarian.ts                # Multi-repo research (328 lines)
 ├── explore.ts                  # Fast codebase grep (124 lines)
 ├── multimodal-looker.ts        # Media analyzer (58 lines)
+├── devils-advocate.ts          # Adversarial validation
 ├── metis.ts                    # Pre-planning analysis (346 lines)
 ├── momus.ts                    # Plan validator (243 lines)
 ├── dynamic-agent-prompt-builder.ts  # Dynamic prompt generation (431 lines)
@@ -55,10 +56,33 @@ agents/
 | librarian | zai-coding-plan/glm-4.7 | 0.1 | Docs, GitHub search (fallback: glm-4.7-free) |
 | explore | xai/grok-code-fast-1 | 0.1 | Fast contextual grep (fallback: claude-haiku-4-5 → gpt-5-mini → gpt-5-nano) |
 | multimodal-looker | google/gemini-3-flash | 0.1 | PDF/image analysis |
+| devils-advocate | google/gemini-3-pro-preview | 0.1 | Adversarial validation |
 | Prometheus | anthropic/claude-opus-4-6 | 0.1 | Strategic planning (fallback: kimi-k2.5 → gpt-5.2) |
 | Metis | anthropic/claude-opus-4-6 | 0.3 | Pre-planning analysis (fallback: kimi-k2.5 → gpt-5.2) |
 | Momus | openai/gpt-5.2 | 0.1 | Plan validation (fallback: claude-opus-4-6) |
 | Sisyphus-Junior | anthropic/claude-sonnet-4-5 | 0.1 | Category-spawned executor |
+
+## MODEL NOTES
+
+### xAI Grok Model Landscape (Feb 2026)
+
+The Grok model family has evolved significantly. If you have `xai/grok-2-1212` in your configuration, **update immediately** to a newer model.
+
+| Model | Status | Recommended For |
+|-------|--------|-----------------|
+| `xai/grok-2-1212` | **DEPRECATED** | Nothing — replace immediately |
+| `xai/grok-3` | Stable | General reasoning (131K context) |
+| `xai/grok-3-mini` | Stable | Lightweight tasks |
+| `xai/grok-4` | Latest flagship | Advanced reasoning (256K context) |
+| `xai/grok-4-fast` | Latest fast | Reasoning + speed (2M context) |
+| `xai/grok-4-1-fast` | **Newest** | Agentic tool calling (2M context) |
+| `xai/grok-code-fast-1` | Current | Coding-specific (256K context) |
+
+**Migration Guide**: If your config uses `xai/grok-2-1212`, replace it with:
+- `xai/grok-code-fast-1` for coding tasks (recommended for `explore` agent)
+- `xai/grok-4-1-fast` for general reasoning and tool calling
+- `xai/grok-3` for lightweight tasks with lower latency
+
 
 ## HOW TO ADD
 1. Create `src/agents/my-agent.ts` exporting factory + metadata.
